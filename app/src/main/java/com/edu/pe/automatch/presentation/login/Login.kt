@@ -3,6 +3,7 @@ package com.edu.pe.automatch.presentation.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,14 +42,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.edu.pe.automatch.R
 import com.edu.pe.automatch.presentation.components.FilledButton
+import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.SoftBackground
 
 @Composable
-fun Login(modifier: Modifier = Modifier) {
+fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
@@ -149,6 +152,9 @@ fun Login(modifier: Modifier = Modifier) {
             color = Color.Black,
             fontSize = 14.sp,
             modifier = Modifier.padding(bottom = 42.dp)
+                .clickable {
+                    onNavigateToRegister()
+                }
         )
 
     }
@@ -157,7 +163,8 @@ fun Login(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun LoginPreview() {
+    val navController = rememberNavController()
     AutoMatchTheme {
-        Login()
+        Login(onNavigateToRegister = {navController.navigate(Screen.SignUp.route)})
     }
 }

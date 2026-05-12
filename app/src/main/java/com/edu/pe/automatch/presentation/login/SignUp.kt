@@ -2,6 +2,7 @@ package com.edu.pe.automatch.presentation.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,14 +44,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.edu.pe.automatch.R
 import com.edu.pe.automatch.presentation.components.FilledButton
+import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.SoftBackground
 
 @Composable
-fun SignUp(modifier: Modifier = Modifier) {
+fun SignUp(modifier: Modifier = Modifier,onNavigateToSignIn: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
@@ -155,7 +158,7 @@ fun SignUp(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 FilledButton(
-                    onClick = { /* Login */ },
+                    onClick = { onNavigateToSignIn },
                     text = "Sign Up"
                 )
             }
@@ -165,7 +168,9 @@ fun SignUp(modifier: Modifier = Modifier) {
             text = "Already have an accout? Sign In",
             color = Color.Black,
             fontSize = 14.sp,
-            modifier = Modifier.padding(bottom = 42.dp)
+            modifier = Modifier.padding(bottom = 42.dp).clickable {
+                onNavigateToSignIn()
+            }
         )
 
     }
@@ -174,7 +179,8 @@ fun SignUp(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun SignUpPreview() {
+    val navController = rememberNavController()
     AutoMatchTheme {
-        SignUp()
+        SignUp(onNavigateToSignIn =  {navController.navigate(Screen.SignIn.route)})
     }
 }
