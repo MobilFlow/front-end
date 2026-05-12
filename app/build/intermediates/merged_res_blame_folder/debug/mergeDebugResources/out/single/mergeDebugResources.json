@@ -1,0 +1,86 @@
+[
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/drawable-xxxhdpi_logo_automatch.png.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/drawable-xxxhdpi/logo_automatch.png"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/xml_backup_rules.xml.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/drawable-hdpi_automatch_logo.png.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/drawable-hdpi/automatch_logo.png"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/xml_data_extraction_rules.xml.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/drawable-mdpi_logo_automatch.png.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/drawable-mdpi/logo_automatch.png"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/drawable-xhdpi_imagen3.png.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/drawable-xhdpi/imagen3.png"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/drawable-xxhdpi_imagen3.png.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/drawable-xxhdpi/imagen3.png"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.edu.pe.automatch.app-debug-46:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.edu.pe.automatch.app-main-48:/drawable/ic_launcher_background.xml"
+    }
+]
