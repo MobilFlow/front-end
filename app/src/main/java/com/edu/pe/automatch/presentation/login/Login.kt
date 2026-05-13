@@ -51,7 +51,11 @@ import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.SoftBackground
 
 @Composable
-fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit) {
+fun Login(
+    modifier: Modifier = Modifier,
+    onNavigateToRegister: () -> Unit,
+    onLoginSuccess: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
@@ -141,7 +145,7 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 FilledButton(
-                    onClick = { /* Login Logic */ },
+                    onClick = { onLoginSuccess() },
                     text = "Sign In"
                 )
             }
@@ -165,6 +169,9 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit) {
 fun LoginPreview() {
     val navController = rememberNavController()
     AutoMatchTheme {
-        Login(onNavigateToRegister = {navController.navigate(Screen.SignUp.route)})
+        Login(
+            onNavigateToRegister = { navController.navigate(Screen.SignUp.route) },
+            onLoginSuccess = { navController.navigate(Screen.MechanicDashboard.route) }
+        )
     }
 }

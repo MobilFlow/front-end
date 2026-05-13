@@ -36,14 +36,22 @@ class MainActivity : ComponentActivity() {
                         Login(
                             onNavigateToRegister = {
                                 navController.navigate(Screen.SignUp.route)
+                            },
+                            onLoginSuccess = {
+                                navController.navigate(Screen.MechanicDashboard.route)
                             }
                         )
                     }
 
                     composable(Screen.SignUp.route) {
-                        SignUp(onNavigateToSignIn = {
-                            navController.navigate(Screen.SignIn.route)
-                        })
+                        SignUp(
+                            onNavigateToSignIn = {
+                                navController.navigate(Screen.SignIn.route)
+                            },
+                            onSignUpSuccess = {
+                                navController.navigate(Screen.MechanicDashboard.route)
+                            }
+                        )
                     }
                 }
             }
@@ -69,6 +77,9 @@ fun AppPreview() {
                 Login(
                     onNavigateToRegister = {
                         navController.navigate(Screen.SignUp.route)
+                    },
+                    onLoginSuccess = {
+                        navController.navigate(Screen.MechanicDashboard.route)
                     }
                 )
             }
@@ -77,6 +88,9 @@ fun AppPreview() {
                 SignUp(
                     onNavigateToSignIn = {
                         navController.navigate(Screen.SignIn.route)
+                    },
+                    onSignUpSuccess = {
+                        navController.navigate(Screen.MechanicDashboard.route)
                     }
                 )
             }
