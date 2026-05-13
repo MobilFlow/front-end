@@ -24,9 +24,12 @@ import com.edu.pe.automatch.presentation.components.BottomNavBar
 import com.edu.pe.automatch.presentation.components.StatCard
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.SoftBackground
+import androidx.navigation.NavController
+import com.edu.pe.automatch.presentation.navigation.Screen
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun MechanicDashboard() {
+fun MechanicDashboard(navController: NavController) {
 
     Column(
         modifier = Modifier
@@ -147,7 +150,17 @@ fun MechanicDashboard() {
 
         BottomNavBar(
             selectedItem = 0,
-            onItemSelected = {}
+            onItemSelected = { index ->
+
+                when(index) {
+
+                    3 -> {
+                        navController.navigate(
+                            Screen.MechanicProfile.route
+                        )
+                    }
+                }
+            }
         )
     }
 }
@@ -155,7 +168,11 @@ fun MechanicDashboard() {
 @Preview(showBackground = true)
 @Composable
 fun MechanicDashboardPreview() {
+
+    val navController = rememberNavController()
+
     AutoMatchTheme {
-        MechanicDashboard()
+
+        MechanicDashboard(navController)
     }
 }

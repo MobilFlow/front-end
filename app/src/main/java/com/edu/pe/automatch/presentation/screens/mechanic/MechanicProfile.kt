@@ -35,9 +35,12 @@ import com.edu.pe.automatch.presentation.components.SpecialtyChip
 import com.edu.pe.automatch.presentation.components.StatCard
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.SoftBackground
+import androidx.navigation.NavController
+import com.edu.pe.automatch.presentation.navigation.Screen
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun MechanicProfile() {
+fun MechanicProfile(navController: NavController) {
 
     Column(
         modifier = Modifier
@@ -57,7 +60,13 @@ fun MechanicProfile() {
 
                     ProfileHeader(
                         name = "Jorge Ramirez",
-                        location = "Certified Mechanic - Callao, Peru"
+                        location = "Certified Mechanic - Callao, Peru",
+
+                        onEditClick = {
+                            navController.navigate(
+                                Screen.EditMechanicProfile.route
+                            )
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -194,7 +203,18 @@ fun MechanicProfile() {
 
         BottomNavBar(
             selectedItem = 3,
-            onItemSelected = {}
+
+            onItemSelected = { index ->
+
+                when(index) {
+
+                    0 -> {
+                        navController.navigate(
+                            Screen.MechanicDashboard.route
+                        )
+                    }
+                }
+            }
         )
     }
 }
@@ -202,7 +222,11 @@ fun MechanicProfile() {
 @Preview(showBackground = true)
 @Composable
 fun MechanicProfilePreview() {
+
+    val navController = rememberNavController()
+
     AutoMatchTheme {
-        MechanicProfile()
+
+        MechanicProfile(navController)
     }
 }

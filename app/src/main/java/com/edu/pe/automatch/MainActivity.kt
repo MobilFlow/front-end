@@ -18,6 +18,9 @@ import com.edu.pe.automatch.presentation.login.Login
 import com.edu.pe.automatch.presentation.login.SignUp
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
+import com.edu.pe.automatch.presentation.screens.mechanic.MechanicDashboard
+import com.edu.pe.automatch.presentation.screens.mechanic.MechanicProfile
+import com.edu.pe.automatch.presentation.screens.mechanic.EditMechanicProfile
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +55,16 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(Screen.MechanicDashboard.route)
                             }
                         )
+                    }
+                    composable(Screen.MechanicDashboard.route) {
+                        MechanicDashboard(navController = navController)
+                    }
+                    composable(Screen.MechanicProfile.route) {
+                        MechanicProfile(navController)
+                    }
+
+                    composable(Screen.EditMechanicProfile.route) {
+                        EditMechanicProfile(navController)
                     }
                 }
             }

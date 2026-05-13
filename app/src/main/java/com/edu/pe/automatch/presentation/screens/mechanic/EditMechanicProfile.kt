@@ -32,9 +32,12 @@ import com.edu.pe.automatch.presentation.components.ProfileHeader
 import com.edu.pe.automatch.presentation.components.SpecialtyChip
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.SoftBackground
+import androidx.navigation.NavController
+import com.edu.pe.automatch.presentation.navigation.Screen
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun EditMechanicProfile() {
+fun EditMechanicProfile(navController: NavController) {
 
     val description = remember {
         mutableStateOf(
@@ -60,7 +63,11 @@ fun EditMechanicProfile() {
 
                     ProfileHeader(
                         name = "Jorge Ramirez",
-                        location = "Certified Mechanic - Callao, Peru"
+                        location = "Certified Mechanic - Callao, Peru",
+
+                        onEditClick = {
+                            navController.popBackStack()
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -137,7 +144,9 @@ fun EditMechanicProfile() {
                     Spacer(modifier = Modifier.height(24.dp))
 
                     TextButton(
-                        onClick = {}
+                        onClick = {
+                            navController.popBackStack()
+                        }
                     ) {
                         Text("Save")
                     }
@@ -157,7 +166,11 @@ fun EditMechanicProfile() {
 @Preview(showBackground = true)
 @Composable
 fun EditMechanicProfilePreview() {
+
+    val navController = rememberNavController()
+
     AutoMatchTheme {
-        EditMechanicProfile()
+
+        EditMechanicProfile(navController)
     }
 }

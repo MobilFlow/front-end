@@ -55,19 +55,19 @@ fun AutoMatchNavigation() {
         // MECHANIC DASHBOARD
         composable(Screen.MechanicDashboard.route) {
 
-            MechanicDashboard()
+            MechanicDashboard(navController)
         }
 
         // MECHANIC PROFILE
         composable(Screen.MechanicProfile.route) {
 
-            MechanicProfile()
+            MechanicProfile(navController)
         }
 
         // EDIT PROFILE
         composable(Screen.EditMechanicProfile.route) {
 
-            EditMechanicProfile()
+            EditMechanicProfile(navController)
         }
     }
 }

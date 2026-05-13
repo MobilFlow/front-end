@@ -1,4 +1,4 @@
-#Tue May 12 18:04:24 PET 2026
+#Wed May 13 02:46:04 PET 2026
 base.0=C\:\\Users\\Kyaru\\Documents\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\Kyaru\\Documents\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.2=C\:\\Users\\Kyaru\\Documents\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
