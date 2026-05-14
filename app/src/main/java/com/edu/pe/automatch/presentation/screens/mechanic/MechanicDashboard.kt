@@ -151,13 +151,14 @@ fun MechanicDashboard(navController: NavController) {
         BottomNavBar(
             selectedItem = 0,
             onItemSelected = { index ->
-
                 when(index) {
-
+                    0 -> {
+                        navController.navigate(Screen.MechanicDashboard.route) {
+                            popUpTo(Screen.MechanicDashboard.route) { inclusive = true }
+                        }
+                    }
                     3 -> {
-                        navController.navigate(
-                            Screen.MechanicProfile.route
-                        )
+                        navController.navigate(Screen.MechanicProfile.createRoute("1"))
                     }
                 }
             }

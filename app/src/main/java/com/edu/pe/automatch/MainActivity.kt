@@ -20,6 +20,9 @@ import com.edu.pe.automatch.presentation.driver.HomeScreen
 import com.edu.pe.automatch.presentation.driver.MechanicProfileScreen
 import com.edu.pe.automatch.presentation.driver.ReviewScreen
 import com.edu.pe.automatch.presentation.driver.UserProfileScreen
+import com.edu.pe.automatch.presentation.screens.mechanic.MechanicDashboard
+import com.edu.pe.automatch.presentation.screens.mechanic.EditMechanicProfile
+import com.edu.pe.automatch.presentation.screens.mechanic.MechanicProfile
 import com.edu.pe.automatch.presentation.login.Login
 import com.edu.pe.automatch.presentation.login.SignUp
 import com.edu.pe.automatch.presentation.navigation.Screen
@@ -52,9 +55,17 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(Screen.SignUp.route) {
-                        SignUp(onNavigateToSignIn = {
-                            navController.navigate(Screen.SignIn.route)
-                        })
+                        SignUp(
+                            onNavigateToSignIn = {
+                                navController.navigate(Screen.SignIn.route)
+                            },
+                            onSignUpSuccess = { isMechanic ->
+                                val destination = if (isMechanic) Screen.MechanicDashboard.route else Screen.Home.route
+                                navController.navigate(destination) {
+                                    popUpTo(Screen.SignUp.route) { inclusive = true }
+                                }
+                            }
+                        )
                     }
 
                     composable(Screen.Home.route) {
@@ -101,6 +112,19 @@ class MainActivity : ComponentActivity() {
                             onPublish = { navController.popBackStack() }
                         )
                     }
+
+                    composable(Screen.MechanicDashboard.route) {
+                        MechanicDashboard(navController)
+                    }
+
+                    composable(Screen.EditMechanicProfile.route) {
+                        EditMechanicProfile(navController)
+                    }
+
+                    // Esta es la versión del perfil para el mecánico (editable)
+                    composable("my_mechanic_profile") {
+                        MechanicProfile(navController)
+                    }
                 }
             }
 
@@ -133,7 +157,8 @@ fun AppPreview() {
                 SignUp(
                     onNavigateToSignIn = {
                         navController.navigate(Screen.SignIn.route)
-                    }
+                    },
+                    onSignUpSuccess = {}
                 )
             }
         }

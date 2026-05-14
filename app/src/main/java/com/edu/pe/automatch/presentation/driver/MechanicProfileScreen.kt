@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,6 +53,7 @@ import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.Primary
 import com.edu.pe.automatch.presentation.theme.PrimaryDark
+import com.edu.pe.automatch.presentation.components.SpecialtyChip
 import com.edu.pe.automatch.presentation.theme.SoftBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -201,21 +204,17 @@ fun MechanicProfileScreen(
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val specialties = listOf("Brakes", "Engine", "AC", "Electrical", "Suspension")
                 specialties.forEach { spec ->
-                    SuggestionChip(
-                        onClick = {},
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = AccentBlue.copy(alpha = 0.1f),
-                            labelColor = Primary
-                        ),
-                        border = null,
-                        label = { Text(spec, fontSize = 13.sp) }
-                    )
+                    SpecialtyChip(label = spec)
                 }
             }
 

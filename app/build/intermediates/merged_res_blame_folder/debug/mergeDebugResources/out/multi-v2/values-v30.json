@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.edu.pe.automatch.app-mergeDebugResources-48:/values-v30/values-v30.xml",
+            "outputFile": "com.edu.pe.automatch.app-mergeDebugResources-64:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Kyaru\\.gradle\\caches\\9.3.1\\transforms\\ef2ea7fe7ccd68213b97d027063d6c21\\workspace\\transformed\\material3\\res\\values-v30\\values-v30.xml",
+                    "source": "C:\\Users\\Kyaru\\.gradle\\caches\\9.4.1\\transforms\\a98d0151bc4df0082aac784f10abff25\\transformed\\jetified-material3-release\\res\\values-v30\\values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
