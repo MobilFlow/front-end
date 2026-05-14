@@ -11,4 +11,6 @@ sealed class Screen(val route: String) {
     object Review : Screen("review/{serviceId}") {
         fun createRoute(serviceId: String) = "review/$serviceId"
     }
+    object MechanicDashboard : Screen("mechanicDashboard")
+    object EditMechanicProfile : Screen("editMechanicProfile")
 }

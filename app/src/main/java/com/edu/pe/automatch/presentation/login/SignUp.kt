@@ -53,7 +53,11 @@ import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.SoftBackground
 
 @Composable
-fun SignUp(modifier: Modifier = Modifier,onNavigateToSignIn: () -> Unit) {
+fun SignUp(
+    modifier: Modifier = Modifier,
+    onNavigateToSignIn: () -> Unit,
+    onSignUpSuccess: (Boolean) -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
@@ -158,7 +162,10 @@ fun SignUp(modifier: Modifier = Modifier,onNavigateToSignIn: () -> Unit) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 FilledButton(
-                    onClick = { onNavigateToSignIn },
+                    onClick = {
+                        val isMechanic = selectedIndex == 1
+                        onSignUpSuccess(isMechanic)
+                    },
                     text = "Sign Up"
                 )
             }
@@ -181,6 +188,13 @@ fun SignUp(modifier: Modifier = Modifier,onNavigateToSignIn: () -> Unit) {
 fun SignUpPreview() {
     val navController = rememberNavController()
     AutoMatchTheme {
-        SignUp(onNavigateToSignIn =  {navController.navigate(Screen.SignIn.route)})
+        SignUp(
+            onNavigateToSignIn = { navController.navigate(Screen.SignIn.route) },
+            onSignUpSuccess = { isMechanic ->
+                if (isMechanic) {
+                    navController.navigate(Screen.MechanicDashboard.route)
+                }
+            }
+        )
     }
 }
