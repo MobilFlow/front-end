@@ -23,11 +23,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +45,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.edu.pe.automatch.R
+import com.edu.pe.automatch.di.RepositoryModule.provideUserRepository
 import com.edu.pe.automatch.presentation.components.FilledButton
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
@@ -55,6 +60,22 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
+
+
+    val viewModel: LoginViewModel = viewModel(
+        factory = LoginViewModelFactory(
+            provideUserRepository()
+        )
+    )
+    val uiState by viewModel.state.collectAsState()
+
+    val debugUser by viewModel.debugUser.collectAsState()
+
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -102,6 +123,9 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 OutlinedTextField(
+                    textStyle = LocalTextStyle.current.copy(
+                        color = Color.Black
+                    ),
                     value = email,
                     onValueChange = { email = it },
                     modifier = Modifier.fillMaxWidth(),
@@ -121,6 +145,9 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
 
                 }
                 OutlinedTextField(
+                    textStyle = LocalTextStyle.current.copy(
+                        color = Color.Black
+                    ),
                     value = password,
                     onValueChange = { password = it },
                     modifier = Modifier.fillMaxWidth(),
@@ -141,8 +168,13 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
                 Spacer(modifier = Modifier.height(32.dp))
 
                 FilledButton(
-                    onClick = { onLoginSuccess() },
-                    text = "Sign In"
+                    onClick = {
+                        viewModel.signIn(
+                            email = email,
+                            password = password
+                        )
+                    },
+                    text = if (uiState.isLoading) "Loading..." else "Sign In"
                 )
             }
         }

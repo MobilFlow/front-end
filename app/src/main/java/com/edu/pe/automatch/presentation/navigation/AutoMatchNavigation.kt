@@ -41,13 +41,8 @@ fun AutoMatchNavigation() {
                 onNavigateToSignIn = {
                     navController.navigate(Screen.SignIn.route)
                 },
-                onSignUpSuccess = { isMechanic ->
-                    if (isMechanic) {
-                        navController.navigate(Screen.MechanicDashboard.route)
-                    } else {
-                        // Aquí podrías navegar al dashboard del conductor cuando esté listo
-                        // navController.navigate(Screen.DriverDashboard.route)
-                    }
+                onSignUpSuccess = {
+                    navController.navigate(Screen.MechanicDashboard.route)
                 }
             )
         }
