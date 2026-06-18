@@ -1,6 +1,5 @@
 package com.edu.pe.automatch.presentation.login
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,17 +45,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.edu.pe.automatch.R
+import com.edu.pe.automatch.di.RepositoryModule
 import com.edu.pe.automatch.presentation.components.FilledButton
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.SoftBackground
+import kotlinx.coroutines.launch
 
 @Composable
-fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLoginSuccess: () -> Unit = {}) {
+fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLoginSuccess: (String) -> Unit = {}) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
+    val userRepo = remember { RepositoryModule.provideUserRepository() }
 
     Column(
         modifier = modifier
@@ -95,7 +103,6 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
                     .padding(20.dp)
                     .fillMaxWidth()
             ) {
-                // Email
                 Text(
                     text = "Email",
                     fontWeight = FontWeight.Medium,
@@ -112,13 +119,11 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Password
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                 }
                 OutlinedTextField(
                     value = password,
@@ -138,11 +143,29 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
                     shape = RoundedCornerShape(12.dp)
                 )
 
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(errorMessage!!, color = Color.Red, fontSize = 13.sp)
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
 
                 FilledButton(
-                    onClick = { onLoginSuccess() },
-                    text = "Sign In"
+                    onClick = {
+                        scope.launch {
+                            isLoading = true
+                            errorMessage = null
+                            try {
+                                val user = userRepo.signIn(email, password)
+                                isLoading = false
+                                onLoginSuccess(user.role)
+                            } catch (e: Exception) {
+                                isLoading = false
+                                errorMessage = "Login failed: ${e.message}"
+                            }
+                        }
+                    },
+                    text = if (isLoading) "Signing in..." else "Sign In"
                 )
             }
         }
@@ -156,7 +179,6 @@ fun Login(modifier: Modifier = Modifier, onNavigateToRegister: () -> Unit, onLog
                     onNavigateToRegister()
                 }
         )
-
     }
 }
 

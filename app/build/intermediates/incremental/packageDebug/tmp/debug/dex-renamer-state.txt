@@ -1,18 +1,18 @@
-#Mon Jun 08 22:38:42 PET 2026
-base.0=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
-base.10=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\6\\classes.dex
-base.11=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
-base.12=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
-base.13=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
-base.2=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\10\\classes.dex
-base.3=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
-base.4=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\13\\classes.dex
-base.5=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\14\\classes.dex
-base.6=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\15\\classes.dex
-base.7=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
-base.8=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\2\\classes.dex
-base.9=C\:\\Users\\gabri\\OneDrive\\Desktop\\Aplicaciones Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
+#Thu Jun 18 11:48:43 PET 2026
+base.0=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.10=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\6\\classes.dex
+base.11=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
+base.12=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.13=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
+base.2=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\10\\classes.dex
+base.3=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
+base.4=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\13\\classes.dex
+base.5=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\14\\classes.dex
+base.6=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\15\\classes.dex
+base.7=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
+base.8=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\2\\classes.dex
+base.9=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
 path.0=classes.dex
 path.1=0/classes.dex
 path.10=6/classes.dex

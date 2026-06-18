@@ -10,6 +10,10 @@ import androidx.navigation.navArgument
 import com.edu.pe.automatch.presentation.driver.HistoryScreen
 import com.edu.pe.automatch.presentation.driver.HomeScreen
 import com.edu.pe.automatch.presentation.driver.MechanicProfileScreen
+import com.edu.pe.automatch.presentation.driver.RequestServiceScreen
+import com.edu.pe.automatch.presentation.driver.ReviewScreen
+import com.edu.pe.automatch.presentation.driver.SearchScreen
+import com.edu.pe.automatch.presentation.driver.UserProfileScreen
 import com.edu.pe.automatch.presentation.login.Login
 import com.edu.pe.automatch.presentation.login.SignUp
 import com.edu.pe.automatch.presentation.screens.mechanic.DriverProfileView
@@ -18,9 +22,6 @@ import com.edu.pe.automatch.presentation.screens.mechanic.MechanicDashboard
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicHistoryScreen
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicProfile
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicRequestsScreen
-import com.edu.pe.automatch.presentation.driver.RequestServiceScreen
-import com.edu.pe.automatch.presentation.driver.SearchScreen
-import com.edu.pe.automatch.presentation.driver.UserProfileScreen
 
 @Composable
 fun AutoMatchNavigation() {
@@ -39,9 +40,15 @@ fun AutoMatchNavigation() {
                 onNavigateToRegister = {
                     navController.navigate(Screen.SignUp.route)
                 },
-                onLoginSuccess = {
-                    navController.navigate(Screen.MechanicDashboard.route)
-                //validación de rol
+                onLoginSuccess = { role ->
+                    val destination = if (role == "ROLE_DRIVER") {
+                        Screen.DriverHome.route
+                    } else {
+                        Screen.MechanicDashboard.route
+                    }
+                    navController.navigate(destination) {
+                        popUpTo(Screen.SignIn.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -53,12 +60,14 @@ fun AutoMatchNavigation() {
                 onNavigateToSignIn = {
                     navController.navigate(Screen.SignIn.route)
                 },
-                onSignUpSuccess = { isMechanic ->
-                    if (isMechanic) {
-                        navController.navigate(Screen.MechanicDashboard.route)
-                    } else { //navegacion para conductor
-                        navController.navigate(Screen.DriverHome.route)
-
+                onSignUpSuccess = { role ->
+                    val destination = if (role == "ROLE_MECHANIC") {
+                        Screen.MechanicDashboard.route
+                    } else {
+                        Screen.DriverHome.route
+                    }
+                    navController.navigate(destination) {
+                        popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
                 }
             )
@@ -118,6 +127,18 @@ fun AutoMatchNavigation() {
         composable(Screen.RequestServiceScreen.route) {
 
             RequestServiceScreen(navController)
+        }
+    // REVIEW SCREEN
+        composable(
+            route = Screen.Review.route,
+            arguments = listOf(navArgument("serviceId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            ReviewScreen(
+                serviceId = backStackEntry.arguments?.getString("serviceId") ?: "",
+                onPublish = {
+                    navController.popBackStack()
+                }
+            )
         }
     //SEARCHSCREEN - DRIVER
         composable(Screen.DriverSearch.route) {

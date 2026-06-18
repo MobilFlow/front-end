@@ -28,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +37,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.edu.pe.automatch.di.RepositoryModule
+import com.edu.pe.automatch.domain.model.MechanicProfile
 import com.edu.pe.automatch.presentation.components.SpecialtyChip
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AccentBlue
@@ -62,6 +70,33 @@ fun MechanicProfileScreen(
     navController: NavController,
     mechanicId: String = ""
 ) {
+    var mechanic by remember { mutableStateOf<MechanicProfile?>(null) }
+    var mechanicName by remember { mutableStateOf("") }
+    var initials by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(true) }
+
+    val userRepo = remember { RepositoryModule.provideUserRepository() }
+    val mechanicRepo = remember { RepositoryModule.provideMechanicRepository() }
+
+    LaunchedEffect(mechanicId) {
+        try {
+            val id = mechanicId.toLongOrNull()
+            if (id != null) {
+                val all = mechanicRepo.getAllMechanics()
+                val found = all.find { it.id == id }
+                if (found != null) {
+                    mechanic = found
+                    val user = userRepo.getUserById(found.userId)
+                    val name = user?.fullName ?: found.workshopName ?: "Mechanic"
+                    mechanicName = name
+                    initials = name.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
+                }
+            }
+        } catch (_: Exception) {
+        }
+        loading = false
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -96,176 +131,133 @@ fun MechanicProfileScreen(
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(SoftBackground)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .background(PrimaryDark)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(Primary)
-                        .align(Alignment.BottomCenter)
-                        .offset(y = 40.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("CM", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 28.sp)
-                }
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
             }
-
-            Spacer(modifier = Modifier.height(52.dp))
-
-            Text(
-                text = "Carlos Martínez",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkGray,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = AccentBlue,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Certified Mechanic", color = AccentBlue, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("128 reviews", color = Color.Gray, fontSize = 13.sp)
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    ProfileStat(label = "Years Exp.", value = "8")
-                    ProfileStat(label = "Services", value = "340")
-                    ProfileStat(label = "Punctuality", value = "98%")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Presentation",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkGray,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Text(
-                    text = "I am a certified mechanic with over 8 years of experience in automotive repair and maintenance. I specialize in engine diagnostics, brake systems, and electrical repairs. I am committed to providing high-quality service at fair prices.",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    lineHeight = 22.sp,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Specialties",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkGray,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            @OptIn(ExperimentalLayoutApi::class)
-            FlowRow(
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxSize()
+                    .padding(padding)
+                    .background(SoftBackground)
+                    .verticalScroll(rememberScrollState())
             ) {
-                listOf("Brakes", "Engine", "AC", "Electrical", "Suspension").forEach { spec ->
-                    SpecialtyChip(label = spec)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Location",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkGray,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Box(modifier = Modifier.fillMaxWidth()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(120.dp)
-                            .background(PrimaryDark.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                            .background(PrimaryDark)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(Primary)
+                            .align(Alignment.BottomCenter)
+                            .offset(y = 40.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.LocationOn,
-                                contentDescription = null,
-                                tint = Primary,
-                                modifier = Modifier.size(36.dp)
-                            )
-                            Text("Map view", color = Color.Gray, fontSize = 12.sp)
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.LocationOn, contentDescription = null, tint = Primary, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Av. Principal 123, Lima", fontSize = 14.sp, color = DarkGray)
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Schedule, contentDescription = null, tint = Primary, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Mon - Fri: 8:00 AM - 6:00 PM", fontSize = 14.sp, color = DarkGray)
+                        Text(initials.ifEmpty { "?" }, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(52.dp))
+
+                Text(
+                    text = mechanicName,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkGray,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+
+                if (mechanic != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Certified Mechanic", color = AccentBlue, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            ProfileStat(label = "Workshop", value = mechanic!!.workshopName ?: "N/A")
+                        }
+                    }
+
+                    if (!mechanic!!.description.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text("Presentation", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                        ) {
+                            Text(
+                                text = mechanic!!.description!!,
+                                fontSize = 14.sp, color = Color.Gray, lineHeight = 22.sp,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    if (mechanic!!.specialties.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text("Specialties", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            mechanic!!.specialties.forEach { spec ->
+                                SpecialtyChip(label = spec.name)
+                            }
+                        }
+                    }
+
+                    if (!mechanic!!.workshopAddress.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text("Location", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Primary, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(mechanic!!.workshopAddress!!, fontSize = 14.sp, color = DarkGray)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 }

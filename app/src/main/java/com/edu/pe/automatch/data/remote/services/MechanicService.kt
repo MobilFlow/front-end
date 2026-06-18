@@ -1,0 +1,19 @@
+package com.edu.pe.automatch.data.remote.services
+
+import com.edu.pe.automatch.data.remote.dtos.MechanicLocationDto
+import com.edu.pe.automatch.data.remote.dtos.MechanicProfileDto
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Path
+
+interface MechanicService {
+
+    @GET("mechanics")
+    suspend fun getAllMechanics(): Response<List<MechanicProfileDto>>
+
+    @GET("mechanics/user/{userId}")
+    suspend fun getMechanicByUserId(@Path("userId") userId: Long): Response<MechanicProfileDto>
+
+    @GET("mechanics/locations")
+    suspend fun getAllLocations(): Response<List<MechanicLocationDto>>
+}

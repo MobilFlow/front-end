@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -33,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,30 +49,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.edu.pe.automatch.R
+import com.edu.pe.automatch.di.RepositoryModule
 import com.edu.pe.automatch.presentation.components.FilledButton
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.SoftBackground
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUp(
     modifier: Modifier = Modifier,
     onNavigateToSignIn: () -> Unit,
-    onSignUpSuccess: (Boolean) -> Unit
+    onSignUpSuccess: (String) -> Unit
 ) {
+    var fullName by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     var selectedIndex by remember { mutableStateOf(0) }
     val options = listOf("Driver", "Mechanic")
+
+    val scope = rememberCoroutineScope()
+    val userRepo = remember { RepositoryModule.provideUserRepository() }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(SoftBackground)
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -103,7 +116,6 @@ fun SignUp(
             }
         }
 
-
         Card(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             shape = RoundedCornerShape(16.dp),
@@ -115,12 +127,29 @@ fun SignUp(
                     .padding(20.dp)
                     .fillMaxWidth()
             ) {
-                // Email
-                Text(
-                    text = "Email",
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                Text(text = "Full Name", fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = 4.dp))
+                OutlinedTextField(
+                    value = fullName,
+                    onValueChange = { fullName = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("John Doe", color = Color.LightGray) },
+                    shape = RoundedCornerShape(12.dp)
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(text = "Phone Number", fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = 4.dp))
+                OutlinedTextField(
+                    value = phoneNumber,
+                    onValueChange = { phoneNumber = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("+51 999 888 777", color = Color.LightGray) },
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(text = "Email", fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = 4.dp))
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -130,16 +159,14 @@ fun SignUp(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Password
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "Password", fontWeight = FontWeight.Medium)
-
                 }
                 OutlinedTextField(
                     value = password,
@@ -159,14 +186,30 @@ fun SignUp(
                     shape = RoundedCornerShape(12.dp)
                 )
 
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(errorMessage!!, color = Color.Red, fontSize = 13.sp)
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
 
                 FilledButton(
                     onClick = {
-                        val isMechanic = selectedIndex == 1
-                        onSignUpSuccess(isMechanic)
+                        scope.launch {
+                            isLoading = true
+                            errorMessage = null
+                            try {
+                                val role = if (selectedIndex == 1) "ROLE_MECHANIC" else "ROLE_DRIVER"
+                                val user = userRepo.signUp(email, password, fullName, phoneNumber, role)
+                                isLoading = false
+                                onSignUpSuccess(user.role)
+                            } catch (e: Exception) {
+                                isLoading = false
+                                errorMessage = "Registration failed: ${e.message}"
+                            }
+                        }
                     },
-                    text = "Sign Up"
+                    text = if (isLoading) "Creating account..." else "Sign Up"
                 )
             }
         }
@@ -179,7 +222,6 @@ fun SignUp(
                 onNavigateToSignIn()
             }
         )
-
     }
 }
 
@@ -190,8 +232,8 @@ fun SignUpPreview() {
     AutoMatchTheme {
         SignUp(
             onNavigateToSignIn = { navController.navigate(Screen.SignIn.route) },
-            onSignUpSuccess = { isMechanic ->
-                if (isMechanic) {
+            onSignUpSuccess = { role ->
+                if (role == "ROLE_MECHANIC") {
                     navController.navigate(Screen.MechanicDashboard.route)
                 }
             }

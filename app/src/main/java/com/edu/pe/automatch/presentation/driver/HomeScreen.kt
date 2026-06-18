@@ -13,6 +13,11 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,22 +29,53 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.edu.pe.automatch.di.RepositoryModule
+import com.edu.pe.automatch.domain.model.Car
+import com.edu.pe.automatch.domain.model.MechanicProfile
 import com.edu.pe.automatch.presentation.components.BottomNavBar
 import com.edu.pe.automatch.presentation.components.BottomNavType
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.*
 
-private val sampleMechanics = listOf(
-    MechanicData(id = "1", name = "Carlos M.", specialties = listOf("Engine", "Brakes"), tags = listOf("Brakes", "AC")),
-    MechanicData(id = "2", name = "Ana L.", specialties = listOf("Transmission", "Electrical"), tags = listOf("Engine", "Battery")),
-    MechanicData(id = "3", name = "Pedro R.", specialties = listOf("Suspension", "Tires"), tags = listOf("Tires", "Alignment"))
-)
-
 @Composable
 fun HomeScreen(
     navController: NavController
 ) {
+    var userName by remember { mutableStateOf("") }
+    var userInitials by remember { mutableStateOf("") }
+    var cars by remember { mutableStateOf<List<Car>>(emptyList()) }
+    var activeCount by remember { mutableStateOf(0) }
+    var totalCount by remember { mutableStateOf(0) }
+    var mechanics by remember { mutableStateOf<List<MechanicProfile>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+
     val scrollState = rememberScrollState()
+    val userRepo = remember { RepositoryModule.provideUserRepository() }
+    val driverRepo = remember { RepositoryModule.provideDriverRepository() }
+    val mechanicRepo = remember { RepositoryModule.provideMechanicRepository() }
+    val serviceRequestRepo = remember { RepositoryModule.provideServiceRequestRepository() }
+
+    LaunchedEffect(Unit) {
+        try {
+            val user = userRepo.getCurrentUser()
+            if (user != null) {
+                userName = user.fullName
+                userInitials = user.fullName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
+
+                val dp = driverRepo.getDriverByUserId(user.id)
+                if (dp != null) {
+                    cars = driverRepo.getCarsByDriverProfile(dp.id)
+                    val requests = serviceRequestRepo.getRequestsByDriver(dp.id)
+                    activeCount = requests.count { it.status == "PENDING" || it.status == "IN_PROGRESS" }
+                    totalCount = requests.size
+                }
+            }
+
+            mechanics = mechanicRepo.getAllMechanics()
+        } catch (_: Exception) {
+        }
+        loading = false
+    }
 
     Scaffold(
         bottomBar = {
@@ -77,7 +113,7 @@ fun HomeScreen(
             ) {
                 Column {
                     Text(text = "Hello,", color = Color.Gray, fontSize = 14.sp)
-                    Text(text = "Liam Parker", color = DarkGray, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    Text(text = userName.ifEmpty { "Loading..." }, color = DarkGray, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(
                     modifier = Modifier
@@ -86,7 +122,7 @@ fun HomeScreen(
                         .background(Primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "LP", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(text = userInitials.ifEmpty { "?" }, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 }
             }
 
@@ -100,30 +136,35 @@ fun HomeScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
+                    val car = cars.firstOrNull()
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Toyota Corolla", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        SuggestionChip(
-                            onClick = {},
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = AccentBlue.copy(alpha = 0.2f),
-                                labelColor = Color.White
-                            ),
-                            border = null,
-                            label = { Text("ABC-123", fontSize = 12.sp, fontWeight = FontWeight.Medium) }
+                        Text(
+                            text = if (car != null) "${car.brand} ${car.model}" else "No vehicle",
+                            color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold
                         )
+                        if (car != null) {
+                            SuggestionChip(
+                                onClick = {},
+                                colors = SuggestionChipDefaults.suggestionChipColors(
+                                    containerColor = AccentBlue.copy(alpha = 0.2f),
+                                    labelColor = Color.White
+                                ),
+                                border = null,
+                                label = { Text(car.plate, fontSize = 12.sp, fontWeight = FontWeight.Medium) }
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        StatItem(label = "Active", value = "2", color = AccentBlue)
-                        StatItem(label = "Total", value = "14", color = Color.White)
-                        StatItem(label = "Rating", value = "4.8", color = Color(0xFFFFC107))
+                        StatItem(label = "Active", value = activeCount.toString(), color = AccentBlue)
+                        StatItem(label = "Total", value = totalCount.toString(), color = Color.White)
                     }
                 }
             }
@@ -146,7 +187,7 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.History,
                     title = "View history",
-                    subtitle = "14 services done",
+                    subtitle = "$totalCount services done",
                     onClick = { navController.navigate(Screen.DriverHistory.route) }
                 )
             }
@@ -171,11 +212,12 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(horizontal = 20.dp)
             ) {
-                items(sampleMechanics, key = { it.id }) { mechanic ->
+                items(mechanics.take(10), key = { it.id.toString() }) { mechanic ->
                     MechanicCard(
-                        mechanic = mechanic,
+                        mechanicName = mechanic.workshopName ?: "Mechanic",
+                        specialties = mechanic.specialties.map { it.name },
                         onClick = {
-                            navController.navigate(Screen.MechanicProfileScreenD.createRoute(mechanic.id))
+                            navController.navigate(Screen.MechanicProfileScreenD.createRoute(mechanic.id.toString()))
                         }
                     )
                 }
@@ -221,18 +263,13 @@ private fun QuickActionCard(
     }
 }
 
-private data class MechanicData(
-    val id: String,
-    val name: String,
-    val specialties: List<String>,
-    val tags: List<String>
-)
-
 @Composable
 private fun MechanicCard(
-    mechanic: MechanicData,
+    mechanicName: String,
+    specialties: List<String>,
     onClick: () -> Unit
 ) {
+    val initials = mechanicName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
     Card(
         onClick = onClick,
         modifier = Modifier.width(200.dp),
@@ -253,32 +290,17 @@ private fun MechanicCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = mechanic.name.take(2).replace(" ", ""),
+                        text = initials,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
-                Text(text = mechanic.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = DarkGray)
+                Text(text = mechanicName, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = DarkGray)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = mechanic.specialties.joinToString(" • "), fontSize = 12.sp, color = Color.Gray)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                mechanic.tags.forEach { tag ->
-                    SuggestionChip(
-                        onClick = {},
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = AccentBlue.copy(alpha = 0.1f),
-                            labelColor = Primary
-                        ),
-                        border = null,
-                        modifier = Modifier.height(28.dp),
-                        label = { Text(tag, fontSize = 11.sp) }
-                    )
-                }
-            }
+            Text(text = specialties.joinToString(" • ").ifEmpty { "General" }, fontSize = 12.sp, color = Color.Gray)
         }
     }
 }
