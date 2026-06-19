@@ -21,19 +21,11 @@ class UserRepositoryImpl(
     private val sessionManager: SessionManager
 ) : UserRepository {
     override suspend fun getUserById(id: Long): User? {
-
         val response = userService.getUserById(id)
-
-        Log.d("USER_DEBUG", "ID=$id")
-        Log.d("USER_DEBUG", "CODE=${response.code()}")
-        Log.d("USER_DEBUG", "BODY=${response.body()}")
-
-        if (!response.isSuccessful) {
-            return null
-        }
-
+        if (!response.isSuccessful) return null
         return response.body()?.toDomain()
     }
+
     override suspend fun signUp(
         email: String,
         password: String,
@@ -41,7 +33,6 @@ class UserRepositoryImpl(
         phoneNumber: String,
         role: String
     ): User = withContext(Dispatchers.IO) {
-
         val request = SignUpRequestDto(
             email = email,
             password = password,
@@ -57,18 +48,13 @@ class UserRepositoryImpl(
             val createdUser = dto?.toDomain()
 
             createdUser?.let {
+                userDao.deleteAll() // LIMPIAR SESIONES ANTERIORES
                 userDao.insert(dto.toEntity())
             }
 
             createdUser ?: throw Exception("Error: respuesta vacía al registrar usuario")
         } else {
-            val errorBody = response.errorBody()?.string()
-
-            throw Exception(
-                "Código: ${response.code()}\n" +
-                        "Mensaje: ${response.message()}\n" +
-                        "Body: $errorBody"
-            )
+            throw Exception("Error in Sign Up: ${response.code()}")
         }
     }
 
@@ -76,7 +62,6 @@ class UserRepositoryImpl(
         email: String,
         password: String
     ): User {
-
         val response = authService.signIn(
             SignInRequestDto(
                 email = email,
@@ -84,18 +69,14 @@ class UserRepositoryImpl(
             )
         )
 
-        if (!response.isSuccessful) {
-            throw Exception("Invalid credentials")
-        }
+        if (!response.isSuccessful) throw Exception("Invalid credentials")
 
-        val body = response.body()
-            ?: throw Exception("Empty response")
-
+        val body = response.body() ?: throw Exception("Empty response")
         SessionManager.token = body.token
 
-        val user = getUserById(body.id)
-            ?: throw Exception("User not found")
+        val user = getUserById(body.id) ?: throw Exception("User not found")
 
+        userDao.deleteAll() // LIMPIAR SESIONES ANTERIORES
         userDao.insert(user.toEntity())
 
         return user
@@ -104,5 +85,4 @@ class UserRepositoryImpl(
     override suspend fun getCurrentUser(): User? {
         return userDao.getCurrentUser()?.toDomain()
     }
-
 }
