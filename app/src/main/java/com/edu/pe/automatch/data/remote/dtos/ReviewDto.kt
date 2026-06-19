@@ -14,7 +14,9 @@ data class ReviewResponseDto(
     val mechanicId: Long,
     val driverId: Long,
     val serviceId: Long,
-    val serviceFinished: Boolean
+    val serviceFinished: Boolean,
+    val createdAt: String? = null,
+    val edited: Boolean = false
 )
 
 data class RatingRequestDto(
@@ -32,4 +34,10 @@ data class RatingResponseDto(
     val driverId: Long,
     val serviceId: Long,
     val serviceFinished: Boolean
+)
+
+data class ReputationSummaryDto(
+    val mechanicId: Long,
+    val averageRating: Double,
+    val totalReviews: Int
 )

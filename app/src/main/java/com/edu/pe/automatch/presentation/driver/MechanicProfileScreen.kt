@@ -23,7 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,31 +34,31 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.edu.pe.automatch.data.remote.dtos.ReviewResponseDto
 import com.edu.pe.automatch.di.RepositoryModule
-import com.edu.pe.automatch.domain.model.MechanicProfile
 import com.edu.pe.automatch.presentation.components.SpecialtyChip
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AccentBlue
-import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
 import com.edu.pe.automatch.presentation.theme.DarkGray
 import com.edu.pe.automatch.presentation.theme.Primary
 import com.edu.pe.automatch.presentation.theme.PrimaryDark
@@ -68,33 +68,26 @@ import com.edu.pe.automatch.presentation.theme.SoftBackground
 @Composable
 fun MechanicProfileScreen(
     navController: NavController,
-    mechanicId: String = ""
-) {
-    var mechanic by remember { mutableStateOf<MechanicProfile?>(null) }
-    var mechanicName by remember { mutableStateOf("") }
-    var initials by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(true) }
-
-    val userRepo = remember { RepositoryModule.provideUserRepository() }
-    val mechanicRepo = remember { RepositoryModule.provideMechanicRepository() }
-
-    LaunchedEffect(mechanicId) {
-        try {
-            val id = mechanicId.toLongOrNull()
-            if (id != null) {
-                val all = mechanicRepo.getAllMechanics()
-                val found = all.find { it.id == id }
-                if (found != null) {
-                    mechanic = found
-                    val user = userRepo.getUserById(found.userId)
-                    val name = user?.fullName ?: found.workshopName ?: "Mechanic"
-                    mechanicName = name
-                    initials = name.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
+    mechanicId: String = "",
+    viewModel: MechanicProfileViewModel = viewModel(
+        factory = remember {
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return MechanicProfileViewModel(
+                        RepositoryModule.provideUserRepository(),
+                        RepositoryModule.provideMechanicRepository(),
+                        RepositoryModule.provideReviewRepository()
+                    ) as T
                 }
             }
-        } catch (_: Exception) {
         }
-        loading = false
+    )
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(mechanicId) {
+        viewModel.loadMechanicProfile(mechanicId)
     }
 
     Scaffold(
@@ -114,67 +107,85 @@ fun MechanicProfileScreen(
             )
         },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SoftBackground)
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
-            ) {
-                Button(
-                    onClick = { navController.navigate(Screen.RequestServiceScreen.route) },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(26.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+            if (uiState is MechanicProfileUiState.Success) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(SoftBackground)
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
                 ) {
-                    Text("Request service", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    Button(
+                        onClick = { navController.navigate(Screen.RequestServiceScreen.route) },
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(26.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    ) {
+                        Text("Request service", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
     ) { padding ->
-        if (loading) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Primary)
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .background(SoftBackground)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .background(PrimaryDark)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                            .background(Primary)
-                            .align(Alignment.BottomCenter)
-                            .offset(y = 40.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(initials.ifEmpty { "?" }, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 28.sp)
-                    }
+        when (val state = uiState) {
+            is MechanicProfileUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Primary)
                 }
+            }
+            is MechanicProfileUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Text(text = state.message, color = Color.Red, textAlign = TextAlign.Center)
+                }
+            }
+            is MechanicProfileUiState.Empty -> {
+                Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Text(text = "Mechanic not found", color = DarkGray)
+                }
+            }
+            is MechanicProfileUiState.Success -> {
+                val mechanic = state.mechanic
+                val fullName = state.fullName
+                val initials = fullName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
+                val reputation = state.reputation
 
-                Spacer(modifier = Modifier.height(52.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .background(SoftBackground)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .background(PrimaryDark)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape)
+                                .background(Primary)
+                                .align(Alignment.BottomCenter)
+                                .offset(y = 40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                        }
+                    }
 
-                Text(
-                    text = mechanicName,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = DarkGray,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
+                    Spacer(modifier = Modifier.height(52.dp))
 
-                if (mechanic != null) {
+                    Text(
+                        text = fullName,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkGray,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
@@ -197,11 +208,13 @@ fun MechanicProfileScreen(
                             modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            ProfileStat(label = "Workshop", value = mechanic!!.workshopName ?: "N/A")
+                            ProfileStat(label = "Rating", value = String.format("%.1f", reputation?.averageRating ?: 0.0))
+                            ProfileStat(label = "Reviews", value = (reputation?.totalReviews ?: 0).toString())
+                            ProfileStat(label = "Workshop", value = mechanic.workshopName ?: "N/A")
                         }
                     }
 
-                    if (!mechanic!!.description.isNullOrBlank()) {
+                    if (!mechanic.description.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text("Presentation", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
                         Spacer(modifier = Modifier.height(8.dp))
@@ -212,14 +225,14 @@ fun MechanicProfileScreen(
                             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                         ) {
                             Text(
-                                text = mechanic!!.description!!,
+                                text = mechanic.description,
                                 fontSize = 14.sp, color = Color.Gray, lineHeight = 22.sp,
                                 modifier = Modifier.padding(16.dp)
                             )
                         }
                     }
 
-                    if (mechanic!!.specialties.isNotEmpty()) {
+                    if (mechanic.specialties.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text("Specialties", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
                         Spacer(modifier = Modifier.height(8.dp))
@@ -229,13 +242,13 @@ fun MechanicProfileScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            mechanic!!.specialties.forEach { spec ->
+                            mechanic.specialties.forEach { spec ->
                                 SpecialtyChip(label = spec.name)
                             }
                         }
                     }
 
-                    if (!mechanic!!.workshopAddress.isNullOrBlank()) {
+                    if (!mechanic.workshopAddress.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text("Location", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
                         Spacer(modifier = Modifier.height(8.dp))
@@ -249,14 +262,41 @@ fun MechanicProfileScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.LocationOn, contentDescription = null, tint = Primary, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(mechanic!!.workshopAddress!!, fontSize = 14.sp, color = DarkGray)
+                                    Text(mechanic.workshopAddress, fontSize = 14.sp, color = DarkGray)
                                 }
                             }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    // Reviews Section
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Reviews", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray)
+                        TextButton(onClick = { /* Read more functionality if needed */ }) {
+                            Text("Read More", color = Primary)
+                        }
+                    }
+                    
+                    if (state.reviews.isEmpty()) {
+                        Text(
+                            "No reviews yet",
+                            modifier = Modifier.fillMaxWidth().padding(20.dp),
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray
+                        )
+                    } else {
+                        state.reviews.forEach { review ->
+                            ReviewItem(review)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }
@@ -270,10 +310,51 @@ private fun ProfileStat(label: String, value: String) {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun MechanicProfileScreenPreview() {
-    AutoMatchTheme {
-        MechanicProfileScreen(rememberNavController())
+private fun ReviewItem(review: ReviewResponseDto) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    repeat(5) {
+                        Icon(
+                            Icons.Default.Star,
+                            contentDescription = null,
+                            tint = Color(0xFFFFB400),
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = review.createdAt?.take(10) ?: "",
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = review.content,
+                fontSize = 14.sp,
+                color = DarkGray,
+                lineHeight = 20.sp
+            )
+            if (review.edited) {
+                Text(
+                    text = "(Edited)",
+                    fontSize = 11.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
     }
 }

@@ -1,7 +1,9 @@
 package com.edu.pe.automatch.data.repository
 
 import com.edu.pe.automatch.data.remote.dtos.RatingRequestDto
+import com.edu.pe.automatch.data.remote.dtos.ReputationSummaryDto
 import com.edu.pe.automatch.data.remote.dtos.ReviewRequestDto
+import com.edu.pe.automatch.data.remote.dtos.ReviewResponseDto
 import com.edu.pe.automatch.data.remote.services.ReputationService
 import com.edu.pe.automatch.domain.repository.ReviewRepository
 
@@ -43,5 +45,15 @@ class ReviewRepositoryImpl(
         )
         val response = reputationService.createRating(request)
         if (!response.isSuccessful) throw Exception("Error creating rating")
+    }
+
+    override suspend fun getReputationSummary(mechanicId: Long): ReputationSummaryDto? {
+        val response = reputationService.getReputationSummary(mechanicId)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    override suspend fun getMechanicReviews(mechanicId: Long): List<ReviewResponseDto> {
+        val response = reputationService.getMechanicReviews(mechanicId)
+        return if (response.isSuccessful) response.body() ?: emptyList() else emptyList()
     }
 }

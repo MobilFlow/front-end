@@ -1,5 +1,8 @@
 package com.edu.pe.automatch.domain.repository
 
+import com.edu.pe.automatch.data.remote.dtos.ReputationSummaryDto
+import com.edu.pe.automatch.data.remote.dtos.ReviewResponseDto
+
 interface ReviewRepository {
 
     suspend fun createReview(
@@ -17,4 +20,8 @@ interface ReviewRepository {
         serviceId: Long,
         serviceFinished: Boolean
     )
+
+    suspend fun getReputationSummary(mechanicId: Long): ReputationSummaryDto?
+
+    suspend fun getMechanicReviews(mechanicId: Long): List<ReviewResponseDto>
 }
