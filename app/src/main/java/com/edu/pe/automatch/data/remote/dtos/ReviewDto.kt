@@ -35,9 +35,8 @@ data class RatingResponseDto(
     val serviceId: Long,
     val serviceFinished: Boolean
 )
-
 data class ReputationSummaryDto(
-    val mechanicId: Long,
     val averageRating: Double,
+    val totalRatings: Int? = null,
     val totalReviews: Int
 )

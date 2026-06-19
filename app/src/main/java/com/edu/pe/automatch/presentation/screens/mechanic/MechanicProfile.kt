@@ -1,4 +1,3 @@
-// MechanicProfile.kt
 package com.edu.pe.automatch.presentation.screens.mechanic
 
 import androidx.compose.foundation.background
@@ -36,8 +35,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.edu.pe.automatch.di.RepositoryModule
@@ -72,9 +74,13 @@ fun MechanicProfile(
     )
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(Unit) {
-        viewModel.loadCurrentMechanicProfile()
+    // Sincronización de datos al volver a la pantalla
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.loadCurrentMechanicProfile()
+        }
     }
 
     Column(
@@ -130,7 +136,7 @@ fun MechanicProfile(
                                         label = "Reviews"
                                     )
                                     StatCard(
-                                        value = "New", 
+                                        value = "Active",
                                         label = "Status"
                                     )
                                 }
@@ -144,7 +150,7 @@ fun MechanicProfile(
                                 Text(
                                     text = mechanic?.description ?: "Welcome! Please edit your profile to add a description of your services.",
                                     fontSize = 14.sp,
-                                    color = if (mechanic == null) Color.Gray else Color.Unspecified
+                                    color = if (mechanic?.description == null) Color.Gray else Color.Unspecified
                                 )
 
                                 Spacer(modifier = Modifier.height(24.dp))
@@ -171,19 +177,20 @@ fun MechanicProfile(
                                 Text(text = "Location", style = MaterialTheme.typography.titleMedium)
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Row {
-                                    Icon(Icons.Default.LocationOn, contentDescription = null)
+                                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Primary)
                                     Spacer(modifier = Modifier.size(8.dp))
                                     Text(location?.addressText ?: mechanic?.workshopAddress ?: "Address not set")
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Row {
-                                    Icon(Icons.Default.Schedule, contentDescription = null)
+                                    Icon(Icons.Default.Schedule, contentDescription = null, tint = Primary)
                                     Spacer(modifier = Modifier.size(8.dp))
                                     Text("Mon - Fri · 7:00am - 8:00pm")
                                 }
 
                                 Spacer(modifier = Modifier.height(24.dp))
-                                
+
+                                // Lógica de Mapa Dinámico
                                 if (location != null) {
                                     MapComponent(
                                         latitude = location.latitude,
@@ -191,7 +198,7 @@ fun MechanicProfile(
                                         title = mechanic?.workshopName ?: fullName
                                     )
                                 } else {
-                                    MapComponent() // Muestra ubicación por defecto si no hay datos
+                                    MapComponent(address = mechanic?.workshopAddress)
                                 }
 
                                 Spacer(modifier = Modifier.height(24.dp))
@@ -200,13 +207,13 @@ fun MechanicProfile(
 
                                 Text(text = "Reviews", style = MaterialTheme.typography.titleMedium)
                                 Spacer(modifier = Modifier.height(12.dp))
-                                
+
                                 if (reviews.isEmpty()) {
                                     Text("No reviews yet.", fontSize = 14.sp, color = Color.Gray)
                                 }
                             }
                         }
-                        
+
                         items(reviews) { review ->
                             Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)) {
                                 ReviewCard(
@@ -230,9 +237,9 @@ fun MechanicProfile(
             onItemSelected = { index ->
                 when(index) {
                     0 -> navController.navigate(Screen.MechanicDashboard.route) { launchSingleTop = true }
-                    1 -> navController.navigate(Screen.MechanicRequests.route)
-                    2 -> navController.navigate(Screen.MechanicHistory.route)
-                    3 -> { /* Actual */ }
+                    1 -> navController.navigate(Screen.MechanicRequests.route) { launchSingleTop = true }
+                    2 -> {} // Chat
+                    3 -> {} // Profile (Actual)
                 }
             }
         )

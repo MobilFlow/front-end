@@ -5,6 +5,8 @@ import com.edu.pe.automatch.domain.model.DriverProfile
 
 interface DriverRepository {
 
+    suspend fun getDriverProfileById(id: Long): DriverProfile?
+
     suspend fun getDriverByUserId(userId: Long): DriverProfile?
 
     suspend fun createDriverProfile(userId: Long): DriverProfile

@@ -9,6 +9,8 @@ interface MechanicRepository {
 
     suspend fun getMechanicByUserId(userId: Long): MechanicProfile?
 
+    suspend fun updateMechanic(mechanic: MechanicProfile): Boolean
+
     suspend fun getAllLocations(): List<MechanicLocation>
 
     suspend fun getMechanicLocation(mechanicId: Long): MechanicLocation?

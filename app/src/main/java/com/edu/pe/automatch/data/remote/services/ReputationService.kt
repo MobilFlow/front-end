@@ -13,19 +13,28 @@ import retrofit2.http.Path
 
 interface ReputationService {
 
-    @POST("reviews")
-    suspend fun createReview(@Body request: ReviewRequestDto): Response<ReviewResponseDto>
-
-    @POST("ratings")
-    suspend fun createRating(@Body request: RatingRequestDto): Response<RatingResponseDto>
-
     @GET("reputation/mechanics/{mechanicId}/summary")
-    suspend fun getReputationSummary(
+    suspend fun getSummary(
         @Path("mechanicId") mechanicId: Long
     ): Response<ReputationSummaryDto>
 
     @GET("reputation/mechanics/{mechanicId}/reviews")
-    suspend fun getMechanicReviews(
+    suspend fun getReviews(
         @Path("mechanicId") mechanicId: Long
     ): Response<List<ReviewResponseDto>>
+
+    @GET("reputation/mechanics/{mechanicId}/ratings")
+    suspend fun getRatings(
+        @Path("mechanicId") mechanicId: Long
+    ): Response<List<RatingResponseDto>>
+
+    @POST("reputation/reviews")
+    suspend fun createReview(
+        @Body request: ReviewRequestDto
+    ): Response<ReviewResponseDto>
+
+    @POST("reputation/ratings")
+    suspend fun createRating(
+        @Body request: RatingRequestDto
+    ): Response<RatingResponseDto>
 }

@@ -26,4 +26,9 @@ interface ServiceRequestService {
 
     @PUT("service-requests/{serviceId}/confirm")
     suspend fun confirmService(@Path("serviceId") serviceId: Long, @Body body: ConfirmServiceRequestDto): Response<ServiceRequestDto>
+
+    @GET("service-requests/mechanic/{mechanicProfileId}")
+    suspend fun getRequestsByMechanic(
+        @Path("mechanicProfileId") mechanicProfileId: Long
+    ): Response<List<ServiceRequestDto>>
 }

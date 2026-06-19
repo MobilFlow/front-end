@@ -18,4 +18,8 @@ interface ServiceRequestRepository {
     suspend fun getServiceHistory(driverProfileId: Long): List<ServiceRequestInfo>
 
     suspend fun getServiceRequestById(serviceId: Long): ServiceRequestInfo?
+
+    suspend fun getRequestsByMechanic(
+        mechanicProfileId: Long
+    ): List<ServiceRequestInfo>
 }

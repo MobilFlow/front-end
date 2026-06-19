@@ -12,7 +12,10 @@ import retrofit2.http.Path
 
 interface DriverService {
 
-    @GET("drivers/user/{userId}")
+    @GET("driver-profiles/{id}")
+    suspend fun getDriverProfileById(@Path("id") id: Long): Response<DriverProfileDto>
+
+    @GET("driver-profiles/user/{userId}")
     suspend fun getDriverByUserId(@Path("userId") userId: Long): Response<DriverProfileDto>
 
     @POST("drivers")

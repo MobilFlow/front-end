@@ -114,9 +114,12 @@ fun AutoMatchNavigation() {
             MechanicProfile(navController)
         }
 // Driver profile - mechanic
-        composable(Screen.DriverProfile.route) {
-
-            DriverProfileView()
+        composable(
+            route = Screen.DriverProfile.route,
+            arguments = listOf(navArgument("driverId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val driverId = backStackEntry.arguments?.getLong("driverId") ?: 0L
+            DriverProfileView(navController, driverId)
         }
 // EDIT PROFILE - mechanic
         composable(Screen.EditMechanicProfile.route) {

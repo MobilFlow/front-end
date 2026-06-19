@@ -49,4 +49,20 @@ class ServiceRequestRepositoryImpl(
         val response = serviceRequestService.getServiceRequest(serviceId)
         return if (response.isSuccessful) response.body()?.toDomain() else null
     }
+    override suspend fun getRequestsByMechanic(
+        mechanicProfileId: Long
+    ): List<ServiceRequestInfo> {
+
+        val response =
+            serviceRequestService.getRequestsByMechanic(
+                mechanicProfileId
+            )
+
+        return if (response.isSuccessful) {
+            response.body()?.map { it.toDomain() }
+                ?: emptyList()
+        } else {
+            emptyList()
+        }
+    }
 }

@@ -13,6 +13,11 @@ class DriverRepositoryImpl(
     private val driverService: DriverService
 ) : DriverRepository {
 
+    override suspend fun getDriverProfileById(id: Long): DriverProfile? {
+        val response = driverService.getDriverProfileById(id)
+        return if (response.isSuccessful) response.body()?.toDomain() else null
+    }
+
     override suspend fun getDriverByUserId(userId: Long): DriverProfile? {
         val response = driverService.getDriverByUserId(userId)
         Log.d("DRIVER_DEBUG", "getDriverByUserId($userId) -> code=${response.code()}, body=${response.body()}, error=${response.errorBody()?.string()}")

@@ -1,8 +1,11 @@
 package com.edu.pe.automatch.data.remote.dtos
 
+import com.google.gson.annotations.SerializedName
+
 data class MechanicProfileDto(
     val id: Long,
     val userId: Long,
+    @SerializedName("bio")
     val description: String?,
     val workshopName: String?,
     val workshopAddress: String?,

@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 fun ProfileHeader(
     name: String,
     location: String,
-    onEditClick: () -> Unit = {},
-    onShareClick: () -> Unit = {}
+    onEditClick: (() -> Unit)? = null,
+    onShareClick: (() -> Unit)? = null
 ) {
 
     Row(
@@ -69,12 +69,16 @@ fun ProfileHeader(
             )
         }
 
-        TextButton(onClick = onEditClick) {
-            Text("Edit")
+        onEditClick?.let {
+            TextButton(onClick = it) {
+                Text("Edit")
+            }
         }
 
-        TextButton(onClick = onShareClick) {
-            Text("Share")
+        onShareClick?.let {
+            TextButton(onClick = it) {
+                Text("Share")
+            }
         }
     }
 }

@@ -10,7 +10,9 @@ sealed class Screen(val route: String) {
     object DriverHome : Screen("driver_home")
     object DriverSearch : Screen("driver_search")
     object DriverHistory : Screen("driver_history")
-    object DriverProfile : Screen("driver_profile")
+    object DriverProfile : Screen("driver_profile/{driverId}") {
+        fun createRoute(driverId: Long) = "driver_profile/$driverId"
+    }
 
     // MECHANIC FLOW
     object MechanicDashboard : Screen("mechanic_dashboard")
