@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,21 +59,27 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         try {
             val user = userRepo.getCurrentUser()
+            Log.d("HomeScreen", "user=$user")
             if (user != null) {
                 userName = user.fullName
                 userInitials = user.fullName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
 
                 val dp = driverRepo.getDriverByUserId(user.id)
+                Log.d("HomeScreen", "driverProfile=$dp")
                 if (dp != null) {
                     cars = driverRepo.getCarsByDriverProfile(dp.id)
+                    Log.d("HomeScreen", "cars=${cars.size}")
                     val requests = serviceRequestRepo.getRequestsByDriver(dp.id)
                     activeCount = requests.count { it.status == "PENDING" || it.status == "IN_PROGRESS" }
                     totalCount = requests.size
+                } else {
+                    Log.d("HomeScreen", "driverProfile is NULL")
                 }
             }
 
             mechanics = mechanicRepo.getAllMechanics()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("HomeScreen", "Error loading data", e)
         }
         loading = false
     }

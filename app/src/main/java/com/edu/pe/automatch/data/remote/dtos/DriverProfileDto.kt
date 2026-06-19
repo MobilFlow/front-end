@@ -14,3 +14,16 @@ data class CarDto(
     val plate: String,
     val fuelType: String?
 )
+
+data class CreateCarDto(
+    val brand: String,
+    val model: String,
+    val year: Int,
+    val plate: String,
+    val fuelType: String? = null
+)
+
+data class CreateDriverProfileDto(
+    val userId: Long,
+    val licenseNumber: String = ""
+)
