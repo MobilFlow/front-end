@@ -16,4 +16,7 @@ interface MechanicService {
 
     @GET("mechanics/locations")
     suspend fun getAllLocations(): Response<List<MechanicLocationDto>>
+
+    @GET("mechanic-locations/{mechanicId}")
+    suspend fun getMechanicLocation(@Path("mechanicId") mechanicId: Long): Response<MechanicLocationDto>
 }

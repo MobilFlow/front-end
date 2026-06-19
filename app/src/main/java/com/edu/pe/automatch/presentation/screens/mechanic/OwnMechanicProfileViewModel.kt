@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.edu.pe.automatch.data.remote.dtos.ReputationSummaryDto
 import com.edu.pe.automatch.data.remote.dtos.ReviewResponseDto
+import com.edu.pe.automatch.domain.model.MechanicLocation
 import com.edu.pe.automatch.domain.model.MechanicProfile
 import com.edu.pe.automatch.domain.repository.MechanicRepository
 import com.edu.pe.automatch.domain.repository.ReviewRepository
@@ -19,7 +20,8 @@ sealed class OwnMechanicProfileUiState {
         val mechanic: MechanicProfile?,
         val fullName: String,
         val reputation: ReputationSummaryDto?,
-        val reviews: List<ReviewResponseDto>
+        val reviews: List<ReviewResponseDto>,
+        val location: MechanicLocation? = null
     ) : OwnMechanicProfileUiState()
     data class Error(val message: String) : OwnMechanicProfileUiState()
 }
@@ -50,17 +52,20 @@ class OwnMechanicProfileViewModel(
                 
                 var reputation: ReputationSummaryDto? = null
                 var reviews: List<ReviewResponseDto> = emptyList()
+                var location: MechanicLocation? = null
 
                 if (mechanic != null) {
                     reputation = reviewRepository.getReputationSummary(mechanic.id)
                     reviews = reviewRepository.getMechanicReviews(mechanic.id)
+                    location = mechanicRepository.getMechanicLocation(mechanic.id)
                 }
 
                 _uiState.value = OwnMechanicProfileUiState.Success(
                     mechanic = mechanic,
                     fullName = currentUser.fullName,
                     reputation = reputation,
-                    reviews = reviews
+                    reviews = reviews,
+                    location = location
                 )
             } catch (e: Exception) {
                 _uiState.value = OwnMechanicProfileUiState.Error(e.message ?: "An unexpected error occurred")

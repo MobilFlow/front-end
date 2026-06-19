@@ -56,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.edu.pe.automatch.data.remote.dtos.ReviewResponseDto
 import com.edu.pe.automatch.di.RepositoryModule
+import com.edu.pe.automatch.presentation.components.MapComponent
 import com.edu.pe.automatch.presentation.components.SpecialtyChip
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AccentBlue
@@ -147,6 +148,7 @@ fun MechanicProfileScreen(
                 val fullName = state.fullName
                 val initials = fullName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
                 val reputation = state.reputation
+                val location = state.location
 
                 Column(
                     modifier = Modifier
@@ -248,7 +250,7 @@ fun MechanicProfileScreen(
                         }
                     }
 
-                    if (!mechanic.workshopAddress.isNullOrBlank()) {
+                    if (!mechanic.workshopAddress.isNullOrBlank() || location != null) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text("Location", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
                         Spacer(modifier = Modifier.height(8.dp))
@@ -262,7 +264,19 @@ fun MechanicProfileScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.LocationOn, contentDescription = null, tint = Primary, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(mechanic.workshopAddress, fontSize = 14.sp, color = DarkGray)
+                                    Text(
+                                        text = location?.addressText ?: mechanic.workshopAddress ?: "N/A",
+                                        fontSize = 14.sp, color = DarkGray
+                                    )
+                                }
+                                
+                                if (location != null) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    MapComponent(
+                                        latitude = location.latitude,
+                                        longitude = location.longitude,
+                                        title = mechanic.workshopName ?: "Workshop"
+                                    )
                                 }
                             }
                         }

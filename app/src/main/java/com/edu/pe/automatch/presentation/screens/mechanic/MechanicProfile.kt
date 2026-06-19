@@ -1,3 +1,4 @@
+// MechanicProfile.kt
 package com.edu.pe.automatch.presentation.screens.mechanic
 
 import androidx.compose.foundation.background
@@ -101,13 +102,14 @@ fun MechanicProfile(
                     val fullName = state.fullName
                     val reputation = state.reputation
                     val reviews = state.reviews
+                    val location = state.location
 
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         item {
                             Column(modifier = Modifier.padding(20.dp)) {
                                 ProfileHeader(
                                     name = fullName,
-                                    location = "Certified Mechanic · ${mechanic?.workshopAddress ?: "Profile incomplete"}",
+                                    location = "Certified Mechanic · ${location?.addressText ?: mechanic?.workshopAddress ?: "Profile incomplete"}",
                                     onEditClick = {
                                         navController.navigate(Screen.EditMechanicProfile.route)
                                     }
@@ -171,7 +173,7 @@ fun MechanicProfile(
                                 Row {
                                     Icon(Icons.Default.LocationOn, contentDescription = null)
                                     Spacer(modifier = Modifier.size(8.dp))
-                                    Text(mechanic?.workshopAddress ?: "Address not set")
+                                    Text(location?.addressText ?: mechanic?.workshopAddress ?: "Address not set")
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Row {
@@ -181,7 +183,17 @@ fun MechanicProfile(
                                 }
 
                                 Spacer(modifier = Modifier.height(24.dp))
-                                MapComponent()
+                                
+                                if (location != null) {
+                                    MapComponent(
+                                        latitude = location.latitude,
+                                        longitude = location.longitude,
+                                        title = mechanic?.workshopName ?: fullName
+                                    )
+                                } else {
+                                    MapComponent() // Muestra ubicación por defecto si no hay datos
+                                }
+
                                 Spacer(modifier = Modifier.height(24.dp))
                                 HorizontalDivider()
                                 Spacer(modifier = Modifier.height(24.dp))

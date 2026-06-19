@@ -21,7 +21,12 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun MapComponent() {
+fun MapComponent(
+    latitude: Double = -12.0621065,
+    longitude: Double = -77.1365256,
+    title: String = "AutoMatch Workshop"
+) {
+    val location = LatLng(latitude, longitude)
 
     if (LocalInspectionMode.current) {
         Box(
@@ -38,14 +43,8 @@ fun MapComponent() {
             )
         }
     } else {
-        val workshopLocation = LatLng(-12.0621065, -77.1365256)
-
         val cameraPositionState = rememberCameraPositionState {
-
-            position = CameraPosition.fromLatLngZoom(
-                workshopLocation,
-                14f
-            )
+            position = CameraPosition.fromLatLngZoom(location, 14f)
         }
 
         GoogleMap(
@@ -54,10 +53,9 @@ fun MapComponent() {
                 .height(200.dp),
             cameraPositionState = cameraPositionState
         ) {
-
             Marker(
-                state = MarkerState(position = workshopLocation),
-                title = "AutoMatch Workshop"
+                state = MarkerState(position = location),
+                title = title
             )
         }
     }

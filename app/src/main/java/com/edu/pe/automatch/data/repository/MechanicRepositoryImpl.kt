@@ -28,4 +28,9 @@ class MechanicRepositoryImpl(
             response.body()?.map { it.toDomain() } ?: emptyList()
         } else emptyList()
     }
+
+    override suspend fun getMechanicLocation(mechanicId: Long): MechanicLocation? {
+        val response = mechanicService.getMechanicLocation(mechanicId)
+        return if (response.isSuccessful) response.body()?.toDomain() else null
+    }
 }

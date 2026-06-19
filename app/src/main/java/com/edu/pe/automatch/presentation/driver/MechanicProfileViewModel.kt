@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.edu.pe.automatch.data.remote.dtos.ReputationSummaryDto
 import com.edu.pe.automatch.data.remote.dtos.ReviewResponseDto
+import com.edu.pe.automatch.domain.model.MechanicLocation
 import com.edu.pe.automatch.domain.model.MechanicProfile
 import com.edu.pe.automatch.domain.repository.MechanicRepository
 import com.edu.pe.automatch.domain.repository.ReviewRepository
@@ -19,7 +20,8 @@ sealed class MechanicProfileUiState {
         val mechanic: MechanicProfile,
         val fullName: String,
         val reputation: ReputationSummaryDto?,
-        val reviews: List<ReviewResponseDto>
+        val reviews: List<ReviewResponseDto>,
+        val location: MechanicLocation? = null
     ) : MechanicProfileUiState()
     data class Error(val message: String) : MechanicProfileUiState()
     object Empty : MechanicProfileUiState()
@@ -43,14 +45,6 @@ class MechanicProfileViewModel(
                     return@launch
                 }
 
-                // First we need the mechanic profile to get the userId
-                // Wait, if the input is mechanicId, we can get mechanic directly
-                // and then user by userId.
-
-                // Assuming mechanicRepository.getAllMechanics() is what we have to use to find it if there's no getMechanicById
-                // But let's check if there is a better way.
-                // Based on current MechanicProfileScreen.kt, it uses getAllMechanics().find
-
                 val allMechanics = mechanicRepository.getAllMechanics()
                 val mechanic = allMechanics.find { it.id == mId }
 
@@ -62,12 +56,14 @@ class MechanicProfileViewModel(
                 val user = userRepository.getUserById(mechanic.userId)
                 val reputation = reviewRepository.getReputationSummary(mId)
                 val reviews = reviewRepository.getMechanicReviews(mId)
+                val location = mechanicRepository.getMechanicLocation(mId)
 
                 _uiState.value = MechanicProfileUiState.Success(
                     mechanic = mechanic,
                     fullName = user?.fullName ?: "Unknown Mechanic",
                     reputation = reputation,
-                    reviews = reviews
+                    reviews = reviews,
+                    location = location
                 )
             } catch (e: Exception) {
                 _uiState.value = MechanicProfileUiState.Error(e.message ?: "An unexpected error occurred")
