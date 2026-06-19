@@ -97,7 +97,7 @@ class UserRepositoryImpl(
         val user = getUserById(body.id)
             ?: throw Exception("User not found")
 
-        
+        userDao.deleteAll()
         userDao.insert(user.toEntity())
 
         return user

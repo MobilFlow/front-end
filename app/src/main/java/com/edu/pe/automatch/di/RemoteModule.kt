@@ -15,7 +15,7 @@
     object RemoteModule {
 
         fun provideBaseUrl(): String {
-            return "http://10.0.2.2:8080/api/v1/"
+            return "https://back-end-automatch1.onrender.com/api/v1/"
         }
 
         fun provideRetrofit(
