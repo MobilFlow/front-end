@@ -1,5 +1,6 @@
 package com.edu.pe.automatch.presentation.login
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,6 +77,7 @@ fun SignUp(
 
     val scope = rememberCoroutineScope()
     val userRepo = remember { RepositoryModule.provideUserRepository() }
+    val driverRepo = remember { RepositoryModule.provideDriverRepository() }
 
     Column(
         modifier = modifier
@@ -201,6 +203,13 @@ fun SignUp(
                             try {
                                 val role = if (selectedIndex == 1) "ROLE_MECHANIC" else "ROLE_DRIVER"
                                 val user = userRepo.signUp(email, password, fullName, phoneNumber, role)
+                                if (role == "ROLE_DRIVER") {
+                                    try {
+                                        driverRepo.createDriverProfile(user.id)
+                                    } catch (e: Exception) {
+                                        Log.d("SignUp", "createDriverProfile failed (non-fatal): ${e.message}")
+                                    }
+                                }
                                 isLoading = false
                                 onSignUpSuccess(user.role)
                             } catch (e: Exception) {

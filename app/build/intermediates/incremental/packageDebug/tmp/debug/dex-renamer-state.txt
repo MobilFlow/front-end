@@ -1,4 +1,4 @@
-#Thu Jun 18 11:48:43 PET 2026
+#Thu Jun 18 23:41:04 PET 2026
 base.0=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.10=C\:\\Users\\Liam\\Documents\\Moviles\\front-end\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\6\\classes.dex
