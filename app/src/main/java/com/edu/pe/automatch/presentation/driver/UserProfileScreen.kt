@@ -15,14 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -34,6 +33,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -50,7 +50,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +62,7 @@ import com.edu.pe.automatch.di.RepositoryModule
 import com.edu.pe.automatch.domain.model.Car
 import com.edu.pe.automatch.presentation.components.BottomNavBar
 import com.edu.pe.automatch.presentation.components.BottomNavType
+import com.edu.pe.automatch.presentation.components.ProfileAvatar
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AccentBlue
 import com.edu.pe.automatch.presentation.theme.AutoMatchTheme
@@ -82,11 +82,15 @@ fun UserProfileScreen(
 ) {
     var userName by remember { mutableStateOf("") }
     var userInitials by remember { mutableStateOf("") }
+    var profilePicture by remember { mutableStateOf<String?>(null) }
     var cars by remember { mutableStateOf<List<Car>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
     var showAddVehicleDialog by remember { mutableStateOf(false) }
+    var showEditPhotoDialog by remember { mutableStateOf(false) }
+    var carToDelete by remember { mutableStateOf<Car?>(null) }
     var refreshKey by remember { mutableStateOf(0) }
 
+    val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val userRepo = remember { RepositoryModule.provideUserRepository() }
     val driverRepo = remember { RepositoryModule.provideDriverRepository() }
@@ -98,6 +102,7 @@ fun UserProfileScreen(
             if (user != null) {
                 userName = user.fullName
                 userInitials = user.fullName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
+                profilePicture = user.profilePicture
                 val dp = driverRepo.getDriverByUserId(user.id)
                 Log.d(TAG, "driverProfile=$dp")
                 if (dp != null) {
@@ -146,20 +151,17 @@ fun UserProfileScreen(
                     Box(
                         modifier = Modifier.fillMaxWidth().height(140.dp).background(PrimaryDark)
                     )
-                    Box(
+                    ProfileAvatar(
+                        imageUrl = profilePicture,
+                        initials = userInitials,
+                        size = 90.dp,
+                        backgroundColor = Primary,
+                        contentColor = Color.White,
+                        fontSize = 32.sp,
                         modifier = Modifier
-                            .size(90.dp)
-                            .clip(CircleShape)
-                            .background(Primary)
                             .align(Alignment.BottomCenter)
-                            .offset(y = 45.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = userInitials.ifEmpty { "?" },
-                            color = Color.White, fontWeight = FontWeight.Bold, fontSize = 32.sp
-                        )
-                    }
+                            .offset(y = 45.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(56.dp))
@@ -170,21 +172,12 @@ fun UserProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
-                        onClick = {},
-                        modifier = Modifier.padding(end = 8.dp),
+                        onClick = { showEditPhotoDialog = true },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Primary)
                     ) {
                         Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Edit")
-                    }
-                    OutlinedButton(
-                        onClick = {},
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Primary)
-                    ) {
-                        Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Share")
                     }
                 }
 
@@ -238,15 +231,25 @@ fun UserProfileScreen(
                                 Text("${car.brand} ${car.model}", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = DarkGray)
                                 Text("Year: ${car.year}", fontSize = 13.sp, color = Color.Gray)
                             }
-                            SuggestionChip(
-                                onClick = {},
-                                colors = SuggestionChipDefaults.suggestionChipColors(
-                                    containerColor = AccentBlue.copy(alpha = 0.1f),
-                                    labelColor = Primary
-                                ),
-                                border = null,
-                                label = { Text(car.plate, fontSize = 12.sp) }
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                SuggestionChip(
+                                    onClick = {},
+                                    colors = SuggestionChipDefaults.suggestionChipColors(
+                                        containerColor = AccentBlue.copy(alpha = 0.1f),
+                                        labelColor = Primary
+                                    ),
+                                    border = null,
+                                    label = { Text(car.plate, fontSize = 12.sp) }
+                                )
+                                IconButton(onClick = { carToDelete = car }) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Eliminar vehículo",
+                                        tint = Color(0xFFD32F2F),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -285,6 +288,118 @@ fun UserProfileScreen(
             }
         )
     }
+
+    if (showEditPhotoDialog) {
+        EditProfileDialog(
+            currentName = userName,
+            currentUrl = profilePicture,
+            onDismiss = { showEditPhotoDialog = false },
+            onSave = { name, url ->
+                scope.launch {
+                    val updated = userRepo.updateProfile(name, url)
+                    if (updated != null) {
+                        userName = updated.fullName
+                        userInitials = updated.fullName.split(" ").filter { it.isNotBlank() }
+                            .take(2).joinToString("") { it.first().uppercase() }
+                        profilePicture = updated.profilePicture
+                    }
+                    showEditPhotoDialog = false
+                }
+            }
+        )
+    }
+
+    carToDelete?.let { car ->
+        DeleteCarDialog(
+            car = car,
+            onDismiss = { carToDelete = null },
+            onConfirm = {
+                scope.launch {
+                    val ok = driverRepo.deleteCar(car.id)
+                    carToDelete = null
+                    if (ok) refreshKey++
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun EditProfileDialog(
+    currentName: String,
+    currentUrl: String?,
+    onDismiss: () -> Unit,
+    onSave: (String?, String?) -> Unit
+) {
+    var name by remember { mutableStateOf(currentName) }
+    var url by remember { mutableStateOf(currentUrl.orEmpty()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar perfil", fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre") },
+                    placeholder = { Text("Tu nombre") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    label = { Text("URL de la foto") },
+                    placeholder = { Text("https://...") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    "Pega la URL de una imagen para la foto de perfil.",
+                    fontSize = 12.sp, color = Color.Gray
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onSave(name.trim().ifBlank { null }, url.trim().ifBlank { null }) }) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
+}
+
+@Composable
+private fun DeleteCarDialog(
+    car: Car,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Eliminar vehículo", fontWeight = FontWeight.Bold) },
+        text = {
+            Text("¿Seguro que quieres eliminar ${car.brand} ${car.model} (${car.plate})? Esta acción no se puede deshacer.")
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F), contentColor = Color.White)
+            ) {
+                Text("Eliminar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
 }
 
 @Composable

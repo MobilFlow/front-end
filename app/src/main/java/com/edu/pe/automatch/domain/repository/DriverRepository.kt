@@ -14,4 +14,6 @@ interface DriverRepository {
     suspend fun getCarsByDriverProfile(driverProfileId: Long): List<Car>
 
     suspend fun createCar(driverProfileId: Long, brand: String, model: String, year: Int, plate: String, fuelType: String? = null): Car
+
+    suspend fun deleteCar(carId: Long): Boolean
 }

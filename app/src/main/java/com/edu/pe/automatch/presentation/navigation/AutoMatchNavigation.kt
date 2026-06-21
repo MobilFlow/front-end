@@ -18,6 +18,7 @@ import com.edu.pe.automatch.presentation.login.Login
 import com.edu.pe.automatch.presentation.login.SignUp
 import com.edu.pe.automatch.presentation.screens.mechanic.DriverProfileView
 import com.edu.pe.automatch.presentation.screens.mechanic.EditMechanicProfile
+import com.edu.pe.automatch.presentation.screens.mechanic.CreateServiceScreen
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicDashboard
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicHistoryScreen
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicProfile
@@ -87,7 +88,7 @@ fun AutoMatchNavigation() {
             SearchScreen(
                 navController = navController,
 
-            )
+                )
         }
 // DRIVERS HOMESCREEN
         composable (Screen.DriverHome.route){
@@ -126,12 +127,16 @@ fun AutoMatchNavigation() {
 
             EditMechanicProfile(navController)
         }
-    // REQUEST SERVICE - DRIVER
+        // CREATE SERVICE - mechanic
+        composable(Screen.CreateService.route) {
+            CreateServiceScreen(navController)
+        }
+        // REQUEST SERVICE - DRIVER
         composable(Screen.RequestServiceScreen.route) {
 
             RequestServiceScreen(navController)
         }
-    // REVIEW SCREEN
+        // REVIEW SCREEN
         composable(
             route = Screen.Review.route,
             arguments = listOf(navArgument("serviceId") { type = NavType.StringType })
@@ -143,16 +148,16 @@ fun AutoMatchNavigation() {
                 }
             )
         }
-    //SEARCHSCREEN - DRIVER
+        //SEARCHSCREEN - DRIVER
         composable(Screen.DriverSearch.route) {
 
             SearchScreen(navController)
         }
 
-    //PROFILE - DRIVER
-    composable (Screen.UserProfileScreen.route) {
-        UserProfileScreen(navController)
-    }
+        //PROFILE - DRIVER
+        composable (Screen.UserProfileScreen.route) {
+            UserProfileScreen(navController)
+        }
         //HISTORY - DRIVER
         composable (Screen.DriverHistory.route) {
             HistoryScreen(navController)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Person
@@ -99,13 +100,24 @@ fun MechanicDashboard(navController: NavController) {
                 totalReviews = summary?.totalReviews ?: 0
             )
 
+            Button(
+                onClick = { navController.navigate(Screen.CreateService.route) },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PurplePrimary, contentColor = Color.White)
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Create Service", fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            }
+
             QuickActionsRow(
                 navController = navController,
                 activeServices = requests.count { it.status != "FINALIZED" && it.status != "CANCELLED" }
             )
 
             SectionWithSeeAll(title = "Recent Requests", showSeeAll = true)
-            
+
             if (requests.isEmpty()) {
                 Text("No requests found", color = Color.Gray, fontSize = 14.sp)
             } else {
@@ -115,7 +127,7 @@ fun MechanicDashboard(navController: NavController) {
             }
 
             SectionWithSeeAll(title = "In Progress", showSeeAll = false)
-            
+
             val inProgress = requests.filter { it.status != "FINALIZED" && it.status != "CANCELLED" }
             if (inProgress.isEmpty()) {
                 Text("No services in progress", color = Color.Gray, fontSize = 14.sp)

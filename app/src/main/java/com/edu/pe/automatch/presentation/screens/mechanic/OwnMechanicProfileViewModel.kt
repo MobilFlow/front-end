@@ -19,6 +19,7 @@ sealed class OwnMechanicProfileUiState {
     data class Success(
         val mechanic: MechanicProfile?,
         val fullName: String,
+        val profilePicture: String? = null,
         val reputation: ReputationSummaryDto?,
         val reviews: List<ReviewResponseDto>,
         val location: MechanicLocation? = null
@@ -49,7 +50,7 @@ class OwnMechanicProfileViewModel(
                 }
 
                 val mechanic = mechanicRepository.getMechanicByUserId(currentUser.id)
-                
+
                 var reputation: ReputationSummaryDto? = null
                 var reviews: List<ReviewResponseDto> = emptyList()
                 var location: MechanicLocation? = null
@@ -63,6 +64,7 @@ class OwnMechanicProfileViewModel(
                 _uiState.value = OwnMechanicProfileUiState.Success(
                     mechanic = mechanic,
                     fullName = currentUser.fullName,
+                    profilePicture = currentUser.profilePicture,
                     reputation = reputation,
                     reviews = reviews,
                     location = location

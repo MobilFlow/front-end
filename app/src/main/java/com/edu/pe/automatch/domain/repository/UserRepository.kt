@@ -21,4 +21,6 @@ interface UserRepository {
     ): User
 
     suspend fun getCurrentUser(): User?
+
+    suspend fun updateProfile(fullName: String?, profilePicture: String?): User?
 }

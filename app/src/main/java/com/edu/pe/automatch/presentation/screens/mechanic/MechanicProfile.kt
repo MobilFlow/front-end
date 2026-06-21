@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -76,7 +77,6 @@ fun MechanicProfile(
     val uiState by viewModel.uiState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Sincronización de datos al volver a la pantalla
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             viewModel.loadCurrentMechanicProfile()
@@ -106,6 +106,7 @@ fun MechanicProfile(
                 is OwnMechanicProfileUiState.Success -> {
                     val mechanic = state.mechanic
                     val fullName = state.fullName
+                    val profilePicture = state.profilePicture
                     val reputation = state.reputation
                     val reviews = state.reviews
                     val location = state.location
@@ -115,6 +116,7 @@ fun MechanicProfile(
                             Column(modifier = Modifier.padding(20.dp)) {
                                 ProfileHeader(
                                     name = fullName,
+                                    imageUrl = profilePicture,
                                     location = "Certified Mechanic · ${location?.addressText ?: mechanic?.workshopAddress ?: "Profile incomplete"}",
                                     onEditClick = {
                                         navController.navigate(Screen.EditMechanicProfile.route)
@@ -125,19 +127,17 @@ fun MechanicProfile(
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
                                 ) {
                                     StatCard(
                                         value = String.format(Locale.getDefault(), "%.1f", reputation?.averageRating ?: 0.0),
-                                        label = "Rating"
+                                        label = "Rating",
+                                        modifier = Modifier.width(130.dp)
                                     )
                                     StatCard(
                                         value = (reputation?.totalReviews ?: 0).toString(),
-                                        label = "Reviews"
-                                    )
-                                    StatCard(
-                                        value = "Active",
-                                        label = "Status"
+                                        label = "Reviews",
+                                        modifier = Modifier.width(130.dp)
                                     )
                                 }
 
@@ -238,8 +238,8 @@ fun MechanicProfile(
                 when(index) {
                     0 -> navController.navigate(Screen.MechanicDashboard.route) { launchSingleTop = true }
                     1 -> navController.navigate(Screen.MechanicRequests.route) { launchSingleTop = true }
-                    2 -> {} // Chat
-                    3 -> {} // Profile (Actual)
+                    2 -> {}
+                    3 -> {}
                 }
             }
         )

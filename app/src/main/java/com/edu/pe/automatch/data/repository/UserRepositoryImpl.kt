@@ -85,4 +85,14 @@ class UserRepositoryImpl(
     override suspend fun getCurrentUser(): User? {
         return userDao.getCurrentUser()?.toDomain()
     }
+
+    override suspend fun updateProfile(fullName: String?, profilePicture: String?): User? {
+        val entity = userDao.getCurrentUser() ?: return null
+        val updated = entity.copy(
+            fullName = fullName?.takeIf { it.isNotBlank() } ?: entity.fullName,
+            profilePicture = profilePicture?.takeIf { it.isNotBlank() }
+        )
+        userDao.insert(updated)
+        return updated.toDomain()
+    }
 }

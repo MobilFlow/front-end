@@ -53,4 +53,10 @@ class DriverRepositoryImpl(
         if (!response.isSuccessful) throw Exception("Error creating car: code=${response.code()}")
         return response.body()?.toDomain() ?: throw Exception("Empty response")
     }
+
+    override suspend fun deleteCar(carId: Long): Boolean {
+        val response = driverService.deleteCar(carId)
+        Log.d("DRIVER_DEBUG", "deleteCar($carId) -> code=${response.code()}, error=${response.errorBody()?.string()}")
+        return response.isSuccessful
+    }
 }

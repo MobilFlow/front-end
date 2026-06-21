@@ -24,3 +24,19 @@ data class MechanicLocationDto(
     val longitude: Double,
     val addressText: String?
 )
+
+data class UpdateMechanicProfileDto(
+    val description: String?,
+    val workshopName: String?,
+    val workshopAddress: String?
+)
+
+data class CreateSpecialtyDto(
+    val name: String
+)
+
+data class UpsertMechanicLocationDto(
+    val latitude: Double,
+    val longitude: Double,
+    val addressText: String?
+)
