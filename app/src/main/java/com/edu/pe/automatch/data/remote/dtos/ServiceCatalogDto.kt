@@ -44,7 +44,16 @@ data class CategoryDto(
     val name: String
 )
 
-// Body para POST /api/v1/categories
+// Body para POST /api/v1/categories (crear categoría nueva)
 data class CreateCategoryDto(
     val name: String
+)
+
+// Body para PUT /api/v1/services/{serviceId} (Update service)
+data class UpdateServiceDto(
+    val title: String,
+    val description: String,
+    val priceMin: Double,
+    val priceMax: Double,
+    val categoryId: Long
 )

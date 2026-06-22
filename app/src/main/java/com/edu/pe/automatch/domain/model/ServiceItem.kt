@@ -8,6 +8,7 @@ data class ServiceItem(
     val minimumPrice: Double?,
     val maximumPrice: Double?,
     val status: String?,
+    val categoryId: Long?,
     val categoryName: String?,
     val imageUrl: String?
 )

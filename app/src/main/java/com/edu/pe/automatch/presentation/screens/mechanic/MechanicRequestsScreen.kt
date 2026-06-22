@@ -44,7 +44,7 @@ fun MechanicRequestsScreen(navController: NavController) {
                 if (mechanic != null) {
                     val requests = serviceRequestRepository.getRequestsByMechanic(mechanic.id)
                     allRequests = requests
-                    
+
                     // Fetch driver names for all requests
                     requests.forEach { req ->
                         if (!driverNames.containsKey(req.driverProfileId)) {
@@ -130,7 +130,7 @@ fun MechanicRequestsScreen(navController: NavController) {
                 when(index) {
                     0 -> navController.navigate(Screen.MechanicDashboard.route)
                     1 -> {}
-                    2 -> navController.navigate(Screen.MechanicHistory.route)
+                    2 -> navController.navigate(Screen.MechanicServices.route)
                     3 -> navController.navigate(Screen.MechanicProfile.route)
                 }
             }

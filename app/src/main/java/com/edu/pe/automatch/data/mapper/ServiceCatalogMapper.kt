@@ -11,6 +11,7 @@ fun ServiceCatalogDto.toDomain() = ServiceItem(
     minimumPrice = minimumPrice,
     maximumPrice = maximumPrice,
     status = status,
+    categoryId = category?.id,
     categoryName = category?.name,
     imageUrl = images?.firstOrNull()?.imageUrl
 )

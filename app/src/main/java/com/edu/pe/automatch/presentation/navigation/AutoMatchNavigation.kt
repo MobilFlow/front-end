@@ -19,6 +19,7 @@ import com.edu.pe.automatch.presentation.login.SignUp
 import com.edu.pe.automatch.presentation.screens.mechanic.DriverProfileView
 import com.edu.pe.automatch.presentation.screens.mechanic.EditMechanicProfile
 import com.edu.pe.automatch.presentation.screens.mechanic.CreateServiceScreen
+import com.edu.pe.automatch.presentation.screens.mechanic.MechanicServicesScreen
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicDashboard
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicHistoryScreen
 import com.edu.pe.automatch.presentation.screens.mechanic.MechanicProfile
@@ -130,6 +131,10 @@ fun AutoMatchNavigation() {
         // CREATE SERVICE - mechanic
         composable(Screen.CreateService.route) {
             CreateServiceScreen(navController)
+        }
+        // MY SERVICES - mechanic
+        composable(Screen.MechanicServices.route) {
+            MechanicServicesScreen(navController)
         }
         // REQUEST SERVICE - DRIVER
         composable(Screen.RequestServiceScreen.route) {

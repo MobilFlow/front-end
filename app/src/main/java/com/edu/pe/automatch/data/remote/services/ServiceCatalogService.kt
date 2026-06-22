@@ -4,10 +4,15 @@ import com.edu.pe.automatch.data.remote.dtos.CategoryDto
 import com.edu.pe.automatch.data.remote.dtos.CreateCategoryDto
 import com.edu.pe.automatch.data.remote.dtos.PublishServiceDto
 import com.edu.pe.automatch.data.remote.dtos.ServiceCatalogDto
+import com.edu.pe.automatch.data.remote.dtos.UpdateServiceDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ServiceCatalogService {
@@ -20,6 +25,24 @@ interface ServiceCatalogService {
 
     @POST("services")
     suspend fun publishService(@Body body: PublishServiceDto): Response<ServiceCatalogDto>
+
+    @PUT("services/{serviceId}")
+    suspend fun updateService(
+        @Path("serviceId") serviceId: Long,
+        @Body body: UpdateServiceDto
+    ): Response<ServiceCatalogDto>
+
+    @PATCH("services/{serviceId}/deactivate")
+    suspend fun deactivateService(@Path("serviceId") serviceId: Long): Response<ServiceCatalogDto>
+
+    // OJO: este endpoint NO está en el Swagger. Es la suposición lógica para reactivar.
+    // Si el backend usa otra ruta, cámbiala aquí.
+    @PATCH("services/{serviceId}/activate")
+    suspend fun activateService(@Path("serviceId") serviceId: Long): Response<ServiceCatalogDto>
+
+    // OJO: este endpoint NO está en el Swagger. El backend quizá no soporta borrado real.
+    @DELETE("services/{serviceId}")
+    suspend fun deleteService(@Path("serviceId") serviceId: Long): Response<Unit>
 
     @GET("categories")
     suspend fun getCategories(): Response<List<CategoryDto>>

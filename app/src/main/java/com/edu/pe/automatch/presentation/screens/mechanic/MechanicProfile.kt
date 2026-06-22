@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -77,6 +78,7 @@ fun MechanicProfile(
     val uiState by viewModel.uiState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    // Sincronización de datos al volver a la pantalla
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             viewModel.loadCurrentMechanicProfile()
@@ -86,6 +88,7 @@ fun MechanicProfile(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .background(SoftBackground)
     ) {
         Box(modifier = Modifier.weight(1f)) {
@@ -114,6 +117,7 @@ fun MechanicProfile(
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         item {
                             Column(modifier = Modifier.padding(20.dp)) {
+                                Spacer(modifier = Modifier.height(12.dp))
                                 ProfileHeader(
                                     name = fullName,
                                     imageUrl = profilePicture,
@@ -125,20 +129,22 @@ fun MechanicProfile(
 
                                 Spacer(modifier = Modifier.height(20.dp))
 
-                                Row(
+                                Box(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    StatCard(
-                                        value = String.format(Locale.getDefault(), "%.1f", reputation?.averageRating ?: 0.0),
-                                        label = "Rating",
-                                        modifier = Modifier.width(130.dp)
-                                    )
-                                    StatCard(
-                                        value = (reputation?.totalReviews ?: 0).toString(),
-                                        label = "Reviews",
-                                        modifier = Modifier.width(130.dp)
-                                    )
+                                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        StatCard(
+                                            value = String.format(Locale.getDefault(), "%.1f", reputation?.averageRating ?: 0.0),
+                                            label = "Rating",
+                                            modifier = Modifier.width(140.dp)
+                                        )
+                                        StatCard(
+                                            value = (reputation?.totalReviews ?: 0).toString(),
+                                            label = "Reviews",
+                                            modifier = Modifier.width(140.dp)
+                                        )
+                                    }
                                 }
 
                                 Spacer(modifier = Modifier.height(24.dp))
@@ -238,8 +244,8 @@ fun MechanicProfile(
                 when(index) {
                     0 -> navController.navigate(Screen.MechanicDashboard.route) { launchSingleTop = true }
                     1 -> navController.navigate(Screen.MechanicRequests.route) { launchSingleTop = true }
-                    2 -> {}
-                    3 -> {}
+                    2 -> navController.navigate(Screen.MechanicServices.route)
+                    3 -> {} // Profile (Actual)
                 }
             }
         )

@@ -67,12 +67,14 @@ fun SearchScreen(
     LaunchedEffect(searchQuery) {
         isLoading = true
         val query = searchQuery.trim()
-        services = if (query.isBlank()) {
+        val raw = if (query.isBlank()) {
             serviceCatalogRepo.getAllServices()
         } else {
             delay(350)
             serviceCatalogRepo.searchServices(query)
         }
+        // Los servicios inactivos no deben aparecer para los conductores.
+        services = raw.filter { it.status?.uppercase() != "INACTIVE" }
         isLoading = false
     }
 

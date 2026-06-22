@@ -142,7 +142,7 @@ fun MechanicHistoryScreen(
                     when (index) {
                         0 -> navController.navigate(Screen.MechanicDashboard.route)
                         1 -> navController.navigate(Screen.MechanicRequests.route)
-                        2 -> {}
+                        2 -> navController.navigate(Screen.MechanicServices.route)
                         3 -> navController.navigate(Screen.MechanicProfile.route)
                     }
                 }

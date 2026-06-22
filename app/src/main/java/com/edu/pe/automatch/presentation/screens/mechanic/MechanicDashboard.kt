@@ -76,7 +76,7 @@ fun MechanicDashboard(navController: NavController) {
                     when (index) {
                         0 -> {} // Current
                         1 -> navController.navigate(Screen.MechanicRequests.route)
-                        2 -> navController.navigate(Screen.MechanicHistory.route)
+                        2 -> navController.navigate(Screen.MechanicServices.route)
                         3 -> navController.navigate(Screen.MechanicProfile.route)
                     }
                 }

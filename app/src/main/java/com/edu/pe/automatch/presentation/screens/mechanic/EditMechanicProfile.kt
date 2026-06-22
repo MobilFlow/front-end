@@ -377,7 +377,7 @@ fun EditMechanicProfile(navController: NavController) {
                 when (index) {
                     0 -> navController.navigate(Screen.MechanicDashboard.route)
                     1 -> navController.navigate(Screen.MechanicRequests.route)
-                    2 -> navController.navigate(Screen.MechanicHistory.route)
+                    2 -> navController.navigate(Screen.MechanicServices.route)
                     3 -> {}
                 }
             }
