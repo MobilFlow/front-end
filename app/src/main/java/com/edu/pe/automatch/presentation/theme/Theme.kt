@@ -45,10 +45,8 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AutoMatchTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
 
-    // Si quieres usar SOLO tu paleta personalizada,
-    // cambia esto a false
     dynamicColor: Boolean = false,
 
     content: @Composable () -> Unit

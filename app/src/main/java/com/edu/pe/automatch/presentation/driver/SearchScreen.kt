@@ -73,7 +73,6 @@ fun SearchScreen(
             delay(350)
             serviceCatalogRepo.searchServices(query)
         }
-        // Los servicios inactivos no deben aparecer para los conductores.
         services = raw.filter { it.status?.uppercase() != "INACTIVE" }
         isLoading = false
     }

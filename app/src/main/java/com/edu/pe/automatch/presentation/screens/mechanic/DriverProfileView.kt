@@ -45,19 +45,16 @@ fun DriverProfileView(navController: NavController, driverId: Long) {
 
     LaunchedEffect(driverId) {
         try {
-            // 1. Obtener el perfil para conseguir el userId real
+
             val profile = driverRepository.getDriverProfileById(driverId)
             
             if (profile != null) {
-                // 2. Con el userId del perfil, traemos los datos del usuario (Nombre, Foto, etc.)
-                driverUser = userRepository.getUserById(profile.userId)
+                 driverUser = userRepository.getUserById(profile.userId)
             }
 
-            // 3. Traemos el historial usando el Profile ID
             history = serviceRequestRepository.getServiceHistory(driverId)
             
-            // 4. Traemos los autos usando el Profile ID
-            cars = driverRepository.getCarsByDriverProfile(driverId)
+             cars = driverRepository.getCarsByDriverProfile(driverId)
             
         } catch (e: Exception) {
             e.printStackTrace()

@@ -32,7 +32,6 @@ import com.edu.pe.automatch.presentation.components.BottomNavBar
 import com.edu.pe.automatch.presentation.components.BottomNavType
 import com.edu.pe.automatch.presentation.navigation.Screen
 
-// ── Colors ────────────────────────────────────────────────────────────────────
 private val PurpleBg       = Color(0xFFEEEDFE)
 private val DarkCardBg     = Color(0xFF1A1740)
 private val DarkCardBadge  = Color(0xFF2D2A5E)

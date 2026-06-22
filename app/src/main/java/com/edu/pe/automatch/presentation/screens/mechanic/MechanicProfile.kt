@@ -78,7 +78,6 @@ fun MechanicProfile(
     val uiState by viewModel.uiState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Sincronización de datos al volver a la pantalla
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             viewModel.loadCurrentMechanicProfile()
@@ -196,7 +195,6 @@ fun MechanicProfile(
 
                                 Spacer(modifier = Modifier.height(24.dp))
 
-                                // Lógica de Mapa Dinámico
                                 if (location != null) {
                                     MapComponent(
                                         latitude = location.latitude,
