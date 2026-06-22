@@ -1,5 +1,6 @@
 package com.edu.pe.automatch.data.repository
 
+import android.util.Log
 import com.edu.pe.automatch.data.remote.dtos.RatingRequestDto
 import com.edu.pe.automatch.data.remote.dtos.RatingResponseDto
 import com.edu.pe.automatch.data.remote.dtos.ReputationSummaryDto
@@ -26,11 +27,17 @@ class ReviewRepositoryImpl(
             serviceId = serviceId,
             serviceFinished = serviceFinished
         )
+        
+        Log.d("REPUTATION_DEBUG", "Sending Review Request: $request")
 
         val response = reputationService.createReview(request)
 
-        if (!response.isSuccessful) {
-            throw Exception("Error creating review")
+        if (response.isSuccessful) {
+            Log.d("REPUTATION_DEBUG", "Review Success: ${response.body()}")
+        } else {
+            val errorBody = response.errorBody()?.string()
+            Log.e("REPUTATION_DEBUG", "Review Error: Code ${response.code()} - Body: $errorBody")
+            throw Exception("Error creating review: $errorBody")
         }
     }
 
@@ -48,11 +55,17 @@ class ReviewRepositoryImpl(
             serviceId = serviceId,
             serviceFinished = serviceFinished
         )
+        
+        Log.d("REPUTATION_DEBUG", "Sending Rating Request: $request")
 
         val response = reputationService.createRating(request)
 
-        if (!response.isSuccessful) {
-            throw Exception("Error creating rating")
+        if (response.isSuccessful) {
+            Log.d("REPUTATION_DEBUG", "Rating Success: ${response.body()}")
+        } else {
+            val errorBody = response.errorBody()?.string()
+            Log.e("REPUTATION_DEBUG", "Rating Error: Code ${response.code()} - Body: $errorBody")
+            throw Exception("Error creating rating: $errorBody")
         }
     }
 

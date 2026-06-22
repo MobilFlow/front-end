@@ -1,5 +1,6 @@
 package com.edu.pe.automatch.presentation.driver
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -100,7 +101,8 @@ fun ReviewScreen(
                     }
                 }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("REPUTATION_DEBUG", "Error loading ReviewScreen data", e)
         }
         loading = false
     }
@@ -208,7 +210,7 @@ fun ReviewScreen(
 
             if (submitError) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Failed to submit review. Try again.", color = Color.Red, fontSize = 13.sp)
+                Text("Failed to submit review. Check logcat for REPUTATION_DEBUG.", color = Color.Red, fontSize = 13.sp)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -219,19 +221,21 @@ fun ReviewScreen(
                         isSubmitting = true
                         submitError = false
                         try {
-                            val sid = serviceId.toLongOrNull() ?: return@launch
-                            val mpId = mechanicProfileId ?: return@launch
-                            val dpId = driverProfileId ?: return@launch
+                            val sid = serviceId.toLongOrNull() ?: throw Exception("Invalid Service ID")
+                            val mpId = mechanicProfileId ?: throw Exception("Mechanic ID not found")
+                            val dpId = driverProfileId ?: throw Exception("Driver ID not found")
 
-                            if (comment.isNotBlank()) {
-                                reviewRepo.createReview(comment, mpId, dpId, sid, true)
-                            }
-                            if (rating > 0) {
-                                reviewRepo.createRating(rating, mpId, dpId, sid, true)
-                            }
+                            Log.d("REPUTATION_DEBUG", "Starting Publish Flow: sid=$sid, mpId=$mpId, dpId=$dpId, rating=$rating")
+
+                            // Flow: 1. Rating, 2. Review
+                            reviewRepo.createRating(rating, mpId, dpId, sid, true)
+                            reviewRepo.createReview(comment, mpId, dpId, sid, true)
+
+                            Log.d("REPUTATION_DEBUG", "Publish Flow completed successfully")
                             isSubmitting = false
                             onPublish()
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            Log.e("REPUTATION_DEBUG", "Flow failed: ${e.message}")
                             isSubmitting = false
                             submitError = true
                         }
@@ -245,7 +249,7 @@ fun ReviewScreen(
                     containerColor = Primary,
                     disabledContainerColor = Color.LightGray
                 ),
-                enabled = (rating > 0 || comment.isNotBlank()) && !isSubmitting
+                enabled = rating > 0 && comment.isNotBlank() && !isSubmitting
             ) {
                 if (isSubmitting) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
