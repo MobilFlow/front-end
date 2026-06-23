@@ -9,6 +9,7 @@ import com.edu.pe.automatch.data.mapper.toDomain
 import com.edu.pe.automatch.data.mapper.toEntity
 import com.edu.pe.automatch.data.remote.dtos.SignInRequestDto
 import com.edu.pe.automatch.data.remote.dtos.SignUpRequestDto
+import com.edu.pe.automatch.data.remote.dtos.UpdateUserDto
 import com.edu.pe.automatch.data.remote.services.AuthService
 import com.edu.pe.automatch.data.remote.services.UserService
 import com.edu.pe.automatch.domain.repository.UserRepository
@@ -87,12 +88,33 @@ class UserRepositoryImpl(
     }
 
     override suspend fun updateProfile(fullName: String?, profilePicture: String?): User? {
-        val entity = userDao.getCurrentUser() ?: return null
-        val updated = entity.copy(
-            fullName = fullName?.takeIf { it.isNotBlank() } ?: entity.fullName,
-            profilePicture = profilePicture?.takeIf { it.isNotBlank() }
+        val current = userDao.getCurrentUser() ?: return null
+        val newName = fullName?.takeIf { it.isNotBlank() } ?: current.fullName
+        val newPic = profilePicture?.takeIf { it.isNotBlank() }
+
+        val body = UpdateUserDto(
+            name = newName,
+            email = current.email,
+            profilePicture = newPic
         )
-        userDao.insert(updated)
-        return updated.toDomain()
+
+        return try {
+            val response = userService.updateUser(current.id, body)
+            Log.d("USER_DEBUG", "updateProfile(id=${current.id}) body=$body -> code=${response.code()}, error=${response.errorBody()?.string()}")
+            if (response.isSuccessful && response.body() != null) {
+                val updatedDto = response.body()!!
+                userDao.insert(updatedDto.toEntity())
+                updatedDto.toDomain()
+            } else {
+                val local = current.copy(fullName = newName, profilePicture = newPic)
+                userDao.insert(local)
+                local.toDomain()
+            }
+        } catch (e: Exception) {
+            Log.e("USER_DEBUG", "updateProfile exception: ${e.message}")
+            val local = current.copy(fullName = newName, profilePicture = newPic)
+            userDao.insert(local)
+            local.toDomain()
+        }
     }
 }

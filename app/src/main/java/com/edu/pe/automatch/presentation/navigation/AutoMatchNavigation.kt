@@ -137,9 +137,16 @@ fun AutoMatchNavigation() {
             MechanicServicesScreen(navController)
         }
         // REQUEST SERVICE - DRIVER
-        composable(Screen.RequestServiceScreen.route) {
-
-            RequestServiceScreen(navController)
+        composable(
+            route = Screen.RequestServiceScreen.route,
+            arguments = listOf(
+                navArgument("serviceId") { type = NavType.StringType; defaultValue = "-1" },
+                navArgument("mechanicId") { type = NavType.StringType; defaultValue = "-1" }
+            )
+        ) { backStackEntry ->
+            val serviceId = backStackEntry.arguments?.getString("serviceId")?.toLongOrNull()?.takeIf { it >= 0 }
+            val mechanicId = backStackEntry.arguments?.getString("mechanicId")?.toLongOrNull()?.takeIf { it >= 0 }
+            RequestServiceScreen(navController, serviceId, mechanicId)
         }
         // REVIEW SCREEN
         composable(
@@ -171,11 +178,16 @@ fun AutoMatchNavigation() {
         // Mechanic Profile Screen from Driver
         composable(
             route = Screen.MechanicProfileScreenD.route,
-            arguments = listOf(navArgument("mechanicId") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("mechanicId") { type = NavType.StringType },
+                navArgument("serviceId") { type = NavType.StringType; defaultValue = "-1" }
+            )
         ) { backStackEntry ->
+            val serviceId = backStackEntry.arguments?.getString("serviceId")?.toLongOrNull()?.takeIf { it >= 0 }
             MechanicProfileScreen(
                 navController = navController,
-                mechanicId = backStackEntry.arguments?.getString("mechanicId") ?: ""
+                mechanicId = backStackEntry.arguments?.getString("mechanicId") ?: "",
+                serviceId = serviceId
             )
         }
     }

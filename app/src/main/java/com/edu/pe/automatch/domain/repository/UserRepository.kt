@@ -1,6 +1,5 @@
 package com.edu.pe.automatch.domain.repository
 
-import kotlinx.coroutines.flow.Flow
 import com.edu.pe.automatch.domain.model.User
 
 interface UserRepository {

@@ -35,11 +35,15 @@ sealed class Screen(val route: String) {
     }
 
     //From Driver to Mechanic Profile
-    object MechanicProfileScreenD : Screen("mechanic_profile_driver/{mechanicId}") {
-        fun createRoute(mechanicId: String) = "mechanic_profile_driver/$mechanicId"
+    object MechanicProfileScreenD : Screen("mechanic_profile_driver/{mechanicId}?serviceId={serviceId}") {
+        fun createRoute(mechanicId: String, serviceId: Long? = null) =
+            "mechanic_profile_driver/$mechanicId?serviceId=${serviceId ?: -1L}"
     }
 
-    object RequestServiceScreen : Screen("request_service?mechanicId={mechanicId}")
+    object RequestServiceScreen : Screen("request_service?serviceId={serviceId}&mechanicId={mechanicId}") {
+        fun createRoute(serviceId: Long, mechanicProfileId: Long?) =
+            "request_service?serviceId=$serviceId&mechanicId=${mechanicProfileId ?: -1L}"
+    }
 
     object EditMechanicProfile : Screen("edit_mechanic_profile")
 

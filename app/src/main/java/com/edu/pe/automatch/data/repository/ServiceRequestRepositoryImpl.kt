@@ -1,6 +1,8 @@
 package com.edu.pe.automatch.data.repository
 
+import android.util.Log
 import com.edu.pe.automatch.data.mapper.toDomain
+import com.edu.pe.automatch.data.remote.dtos.ConfirmServiceRequestDto
 import com.edu.pe.automatch.data.remote.dtos.CreateServiceRequestDto
 import com.edu.pe.automatch.data.remote.services.ServiceRequestService
 import com.edu.pe.automatch.domain.model.ServiceRequestInfo
@@ -49,20 +51,23 @@ class ServiceRequestRepositoryImpl(
         val response = serviceRequestService.getServiceRequest(serviceId)
         return if (response.isSuccessful) response.body()?.toDomain() else null
     }
-    override suspend fun getRequestsByMechanic(
-        mechanicProfileId: Long
-    ): List<ServiceRequestInfo> {
 
-        val response =
-            serviceRequestService.getRequestsByMechanic(
-                mechanicProfileId
-            )
-
+    override suspend fun getRequestsByMechanic(mechanicProfileId: Long): List<ServiceRequestInfo> {
+        val response = serviceRequestService.getRequestsByMechanic(mechanicProfileId)
         return if (response.isSuccessful) {
-            response.body()?.map { it.toDomain() }
-                ?: emptyList()
-        } else {
-            emptyList()
-        }
+            response.body()?.map { it.toDomain() } ?: emptyList()
+        } else emptyList()
+    }
+
+    override suspend fun confirmService(requestId: Long, actorProfileId: Long, role: String): ServiceRequestInfo? {
+        val response = serviceRequestService.confirmService(requestId, ConfirmServiceRequestDto(actorProfileId, role))
+        Log.d("SERVICE_DEBUG", "confirmService(req=$requestId, actor=$actorProfileId, role=$role) -> code=${response.code()}, error=${response.errorBody()?.string()}")
+        return if (response.isSuccessful) response.body()?.toDomain() else null
+    }
+
+    override suspend fun cancelService(requestId: Long, actorProfileId: Long, role: String): ServiceRequestInfo? {
+        val response = serviceRequestService.cancelService(requestId, ConfirmServiceRequestDto(actorProfileId, role))
+        Log.d("SERVICE_DEBUG", "cancelService(req=$requestId, actor=$actorProfileId, role=$role) -> code=${response.code()}, error=${response.errorBody()?.string()}")
+        return if (response.isSuccessful) response.body()?.toDomain() else null
     }
 }

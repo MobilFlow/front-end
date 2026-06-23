@@ -25,7 +25,16 @@ interface ServiceRequestService {
     suspend fun getServiceHistory(@Path("driverProfileId") driverProfileId: Long): Response<List<ServiceRequestDto>>
 
     @PUT("service-requests/{serviceId}/confirm")
-    suspend fun confirmService(@Path("serviceId") serviceId: Long, @Body body: ConfirmServiceRequestDto): Response<ServiceRequestDto>
+    suspend fun confirmService(
+        @Path("serviceId") serviceId: Long,
+        @Body body: ConfirmServiceRequestDto
+    ): Response<ServiceRequestDto>
+
+    @PUT("service-requests/{serviceId}/cancel")
+    suspend fun cancelService(
+        @Path("serviceId") serviceId: Long,
+        @Body body: ConfirmServiceRequestDto
+    ): Response<ServiceRequestDto>
 
     @GET("service-requests/mechanic/{mechanicProfileId}")
     suspend fun getRequestsByMechanic(

@@ -24,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -73,6 +74,7 @@ fun SearchScreen(
             delay(350)
             serviceCatalogRepo.searchServices(query)
         }
+        // Los servicios inactivos no deben aparecer para los conductores.
         services = raw.filter { it.status?.uppercase() != "INACTIVE" }
         isLoading = false
     }
@@ -171,8 +173,22 @@ fun SearchScreen(
                         items(services, key = { it.id }) { service ->
                             ServiceCard(
                                 service = service,
+                                onView = {
+                                    val mId = service.mechanicProfileId
+                                    if (mId != null) {
+                                        navController.navigate(
+                                            Screen.MechanicProfileScreenD.createRoute(mId.toString(), service.id)
+                                        )
+                                    } else {
+                                        navController.navigate(
+                                            Screen.RequestServiceScreen.createRoute(service.id, null)
+                                        )
+                                    }
+                                },
                                 onRequest = {
-                                    navController.navigate(Screen.RequestServiceScreen.route)
+                                    navController.navigate(
+                                        Screen.RequestServiceScreen.createRoute(service.id, service.mechanicProfileId)
+                                    )
                                 }
                             )
                         }
@@ -187,6 +203,7 @@ fun SearchScreen(
 @Composable
 private fun ServiceCard(
     service: ServiceItem,
+    onView: () -> Unit,
     onRequest: () -> Unit
 ) {
     Card(
@@ -195,43 +212,48 @@ private fun ServiceCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = service.title.ifBlank { "Service #${service.id}" },
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    color = DarkGray
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                if (service.categoryName != null) {
-                    Text(text = service.categoryName, fontSize = 13.sp, color = Primary, fontWeight = FontWeight.Medium)
-                }
-                if (service.description.isNotBlank()) {
-                    Text(text = service.description, fontSize = 13.sp, color = Color.Gray, maxLines = 2)
-                }
-                val priceLabel = priceRangeLabel(service.minimumPrice, service.maximumPrice)
-                if (priceLabel != null) {
-                    Text(text = priceLabel, fontSize = 13.sp, color = Color.Gray)
-                }
+            Text(
+                text = service.title.ifBlank { "Service #${service.id}" },
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = DarkGray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            if (service.categoryName != null) {
+                Text(text = service.categoryName, fontSize = 13.sp, color = Primary, fontWeight = FontWeight.Medium)
             }
-            Spacer(modifier = Modifier.size(12.dp))
-            Button(
-                onClick = onRequest,
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Primary,
-                    contentColor = Color.White
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-            ) {
-                Text(text = "Request", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            if (service.description.isNotBlank()) {
+                Text(text = service.description, fontSize = 13.sp, color = Color.Gray, maxLines = 2)
+            }
+            val priceLabel = priceRangeLabel(service.minimumPrice, service.maximumPrice)
+            if (priceLabel != null) {
+                Text(text = priceLabel, fontSize = 13.sp, color = Color.Gray)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = onView,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Primary)
+                ) {
+                    Text(text = "View mechanic", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+                Button(
+                    onClick = onRequest,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary, contentColor = Color.White),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                ) {
+                    Text(text = "Request", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }

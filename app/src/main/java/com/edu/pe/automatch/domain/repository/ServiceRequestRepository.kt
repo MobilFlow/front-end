@@ -19,7 +19,9 @@ interface ServiceRequestRepository {
 
     suspend fun getServiceRequestById(serviceId: Long): ServiceRequestInfo?
 
-    suspend fun getRequestsByMechanic(
-        mechanicProfileId: Long
-    ): List<ServiceRequestInfo>
+    suspend fun getRequestsByMechanic(mechanicProfileId: Long): List<ServiceRequestInfo>
+
+    suspend fun confirmService(requestId: Long, actorProfileId: Long, role: String): ServiceRequestInfo?
+
+    suspend fun cancelService(requestId: Long, actorProfileId: Long, role: String): ServiceRequestInfo?
 }

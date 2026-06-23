@@ -65,6 +65,7 @@ fun ReviewScreen(
     var submitError by remember { mutableStateOf(false) }
 
     var rating by remember { mutableStateOf(0) }
+    var alreadyReviewed by remember { mutableStateOf(false) }
     var comment by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
@@ -96,6 +97,13 @@ fun ReviewScreen(
                             val name = mechUser?.fullName ?: mp.workshopName ?: "Mechanic"
                             mechanicName = name
                             mechanicInitials = name.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
+                        }
+
+                        // ¿Este driver ya dejó una reseña para este servicio?
+                        val dpId = dp?.id
+                        if (dpId != null) {
+                            alreadyReviewed = reviewRepo.getMechanicReviews(mpId)
+                                .any { it.driverId == dpId && it.serviceId == sid }
                         }
                     }
                 }
@@ -161,100 +169,124 @@ fun ReviewScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "How did it go?",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkGray
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                repeat(5) { index ->
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Star ${index + 1}",
-                        tint = if (index < rating) Color(0xFFFFC107) else Color.LightGray,
-                        modifier = Modifier
-                            .clickable { rating = index + 1 }
-                            .size(44.dp)
-                            .background(
-                                color = if (index < rating) Color(0xFFFFC107).copy(alpha = 0.1f)
-                                else Color.Transparent,
-                                shape = CircleShape
-                            )
-                            .padding(4.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            OutlinedTextField(
-                value = comment,
-                onValueChange = { comment = it },
-                modifier = Modifier.fillMaxWidth().height(160.dp),
-                shape = RoundedCornerShape(16.dp),
-                placeholder = { Text("Share your experience...", color = Color.LightGray) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Primary,
-                    unfocusedBorderColor = Color.LightGray,
-                    cursorColor = Primary
+            if (alreadyReviewed) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Ya dejaste una reseña para este servicio.",
+                    fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = DarkGray,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
-            )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Solo puedes calificar una vez por servicio.",
+                    fontSize = 13.sp, color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = onPublish,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(26.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                ) {
+                    Text(text = "Go back", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                }
+            } else {
 
-            if (submitError) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Failed to submit review. Try again.", color = Color.Red, fontSize = 13.sp)
-            }
+                Spacer(modifier = Modifier.height(32.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "How did it go?",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkGray
+                )
 
-            Button(
-                onClick = {
-                    scope.launch {
-                        isSubmitting = true
-                        submitError = false
-                        try {
-                            val sid = serviceId.toLongOrNull() ?: return@launch
-                            val mpId = mechanicProfileId ?: return@launch
-                            val dpId = driverProfileId ?: return@launch
+                Spacer(modifier = Modifier.height(16.dp))
 
-                            if (comment.isNotBlank()) {
-                                reviewRepo.createReview(comment, mpId, dpId, sid, true)
-                            }
-                            if (rating > 0) {
-                                reviewRepo.createRating(rating, mpId, dpId, sid, true)
-                            }
-                            isSubmitting = false
-                            onPublish()
-                        } catch (_: Exception) {
-                            isSubmitting = false
-                            submitError = true
-                        }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Star ${index + 1}",
+                            tint = if (index < rating) Color(0xFFFFC107) else Color.LightGray,
+                            modifier = Modifier
+                                .clickable { rating = index + 1 }
+                                .size(44.dp)
+                                .background(
+                                    color = if (index < rating) Color(0xFFFFC107).copy(alpha = 0.1f)
+                                    else Color.Transparent,
+                                    shape = CircleShape
+                                )
+                                .padding(4.dp)
+                        )
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Primary,
-                    disabledContainerColor = Color.LightGray
-                ),
-                enabled = (rating > 0 || comment.isNotBlank()) && !isSubmitting
-            ) {
-                if (isSubmitting) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                } else {
-                    Text(
-                        text = "Publish",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = { comment = it },
+                    modifier = Modifier.fillMaxWidth().height(160.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    placeholder = { Text("Share your experience...", color = Color.LightGray) },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Primary,
+                        unfocusedBorderColor = Color.LightGray,
+                        cursorColor = Primary
                     )
+                )
+
+                if (submitError) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Failed to submit review. Try again.", color = Color.Red, fontSize = 13.sp)
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isSubmitting = true
+                            submitError = false
+                            try {
+                                val sid = serviceId.toLongOrNull() ?: return@launch
+                                val mpId = mechanicProfileId ?: return@launch
+                                val dpId = driverProfileId ?: return@launch
+
+                                if (comment.isNotBlank()) {
+                                    reviewRepo.createReview(comment, mpId, dpId, sid, true)
+                                }
+                                if (rating > 0) {
+                                    reviewRepo.createRating(rating, mpId, dpId, sid, true)
+                                }
+                                isSubmitting = false
+                                onPublish()
+                            } catch (_: Exception) {
+                                isSubmitting = false
+                                submitError = true
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(26.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Primary,
+                        disabledContainerColor = Color.LightGray
+                    ),
+                    enabled = (rating > 0 || comment.isNotBlank()) && !isSubmitting
+                ) {
+                    if (isSubmitting) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text(
+                            text = "Publish",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }

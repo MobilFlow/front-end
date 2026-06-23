@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -78,6 +77,7 @@ fun MechanicProfile(
     val uiState by viewModel.uiState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    // Sincronización de datos al volver a la pantalla
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             viewModel.loadCurrentMechanicProfile()
@@ -186,15 +186,10 @@ fun MechanicProfile(
                                     Spacer(modifier = Modifier.size(8.dp))
                                     Text(location?.addressText ?: mechanic?.workshopAddress ?: "Address not set")
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row {
-                                    Icon(Icons.Default.Schedule, contentDescription = null, tint = Primary)
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                    Text("Mon - Fri · 7:00am - 8:00pm")
-                                }
 
                                 Spacer(modifier = Modifier.height(24.dp))
 
+                                // Lógica de Mapa Dinámico
                                 if (location != null) {
                                     MapComponent(
                                         latitude = location.latitude,

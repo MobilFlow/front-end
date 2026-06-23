@@ -32,7 +32,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.edu.pe.automatch.di.RepositoryModule
 import com.edu.pe.automatch.domain.model.Car
-import com.edu.pe.automatch.domain.model.MechanicProfile
+import com.edu.pe.automatch.domain.model.ServiceItem
 import com.edu.pe.automatch.presentation.components.BottomNavBar
 import com.edu.pe.automatch.presentation.components.BottomNavType
 import com.edu.pe.automatch.presentation.navigation.Screen
@@ -47,37 +47,32 @@ fun HomeScreen(
     var cars by remember { mutableStateOf<List<Car>>(emptyList()) }
     var activeCount by remember { mutableStateOf(0) }
     var totalCount by remember { mutableStateOf(0) }
-    var mechanics by remember { mutableStateOf<List<MechanicProfile>>(emptyList()) }
+    var services by remember { mutableStateOf<List<ServiceItem>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
 
     val scrollState = rememberScrollState()
     val userRepo = remember { RepositoryModule.provideUserRepository() }
     val driverRepo = remember { RepositoryModule.provideDriverRepository() }
-    val mechanicRepo = remember { RepositoryModule.provideMechanicRepository() }
     val serviceRequestRepo = remember { RepositoryModule.provideServiceRequestRepository() }
+    val catalogRepo = remember { RepositoryModule.provideServiceCatalogRepository() }
 
     LaunchedEffect(Unit) {
         try {
             val user = userRepo.getCurrentUser()
-            Log.d("HomeScreen", "user=$user")
             if (user != null) {
                 userName = user.fullName
                 userInitials = user.fullName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
 
                 val dp = driverRepo.getDriverByUserId(user.id)
-                Log.d("HomeScreen", "driverProfile=$dp")
                 if (dp != null) {
                     cars = driverRepo.getCarsByDriverProfile(dp.id)
-                    Log.d("HomeScreen", "cars=${cars.size}")
                     val requests = serviceRequestRepo.getRequestsByDriver(dp.id)
                     activeCount = requests.count { it.status == "PENDING" || it.status == "IN_PROGRESS" }
                     totalCount = requests.size
-                } else {
-                    Log.d("HomeScreen", "driverProfile is NULL")
                 }
             }
-
-            mechanics = mechanicRepo.getAllMechanics()
+            // Solo servicios disponibles (no inactivos)
+            services = catalogRepo.getAllServices().filter { it.status?.uppercase() != "INACTIVE" }
         } catch (e: Exception) {
             Log.e("HomeScreen", "Error loading data", e)
         }
@@ -187,8 +182,8 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.Build,
                     title = "Request a service",
-                    subtitle = "Find the best mechanic",
-                    onClick = { navController.navigate(Screen.RequestServiceScreen.route) }
+                    subtitle = "Browse published services",
+                    onClick = { navController.navigate(Screen.DriverSearch.route) }
                 )
                 QuickActionCard(
                     modifier = Modifier.weight(1f),
@@ -201,13 +196,13 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Mechanics Nearby
+            // Available Services
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Mechanics Nearby", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray)
+                Text(text = "Available Services", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray)
                 TextButton(onClick = { navController.navigate(Screen.DriverSearch.route) }) {
                     Text("See all", color = PrimaryLight)
                 }
@@ -215,18 +210,37 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 20.dp)
-            ) {
-                items(mechanics.take(10), key = { it.id.toString() }) { mechanic ->
-                    MechanicCard(
-                        mechanicName = mechanic.workshopName ?: "Mechanic",
-                        specialties = mechanic.specialties.map { it.name },
-                        onClick = {
-                            navController.navigate(Screen.MechanicProfileScreenD.createRoute(mechanic.id.toString()))
-                        }
-                    )
+            if (!loading && services.isEmpty()) {
+                Text(
+                    "No hay servicios disponibles por ahora.",
+                    color = Color.Gray, fontSize = 14.sp,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            } else {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp)
+                ) {
+                    items(services.take(10), key = { it.id }) { service ->
+                        ServiceMiniCard(
+                            title = service.title.ifBlank { "Service #${service.id}" },
+                            category = service.categoryName,
+                            priceMin = service.minimumPrice,
+                            priceMax = service.maximumPrice,
+                            onClick = {
+                                val mId = service.mechanicProfileId
+                                if (mId != null) {
+                                    navController.navigate(
+                                        Screen.MechanicProfileScreenD.createRoute(mId.toString(), service.id)
+                                    )
+                                } else {
+                                    navController.navigate(
+                                        Screen.RequestServiceScreen.createRoute(service.id, null)
+                                    )
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -271,15 +285,16 @@ private fun QuickActionCard(
 }
 
 @Composable
-private fun MechanicCard(
-    mechanicName: String,
-    specialties: List<String>,
+private fun ServiceMiniCard(
+    title: String,
+    category: String?,
+    priceMin: Double?,
+    priceMax: Double?,
     onClick: () -> Unit
 ) {
-    val initials = mechanicName.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
     Card(
         onClick = onClick,
-        modifier = Modifier.width(200.dp),
+        modifier = Modifier.width(220.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -288,26 +303,17 @@ private fun MechanicCard(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = initials,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(text = mechanicName, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = DarkGray)
+            Text(text = title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = DarkGray, maxLines = 1)
+            Spacer(modifier = Modifier.height(4.dp))
+            if (category != null) {
+                Text(text = category, fontSize = 12.sp, color = Primary, fontWeight = FontWeight.Medium)
+            }
+            if (priceMin != null && priceMax != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "S/ ${priceMin.toInt()} - S/ ${priceMax.toInt()}", fontSize = 12.sp, color = Color.Gray)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = specialties.joinToString(" • ").ifEmpty { "General" }, fontSize = 12.sp, color = Color.Gray)
+            Text(text = "View mechanic →", fontSize = 12.sp, color = PrimaryLight, fontWeight = FontWeight.SemiBold)
         }
     }
 }

@@ -26,6 +26,7 @@ import com.edu.pe.automatch.domain.model.Car
 import com.edu.pe.automatch.domain.model.DriverProfile
 import com.edu.pe.automatch.domain.model.ServiceRequestInfo
 import com.edu.pe.automatch.domain.model.User
+import com.edu.pe.automatch.presentation.components.ProfileAvatar
 import com.edu.pe.automatch.presentation.theme.*
 
 @Composable
@@ -45,17 +46,20 @@ fun DriverProfileView(navController: NavController, driverId: Long) {
 
     LaunchedEffect(driverId) {
         try {
-
+            // 1. Obtener el perfil para conseguir el userId real
             val profile = driverRepository.getDriverProfileById(driverId)
-            
+
             if (profile != null) {
-                 driverUser = userRepository.getUserById(profile.userId)
+                // 2. Con el userId del perfil, traemos los datos del usuario (Nombre, Foto, etc.)
+                driverUser = userRepository.getUserById(profile.userId)
             }
 
+            // 3. Traemos el historial usando el Profile ID
             history = serviceRequestRepository.getServiceHistory(driverId)
-            
-             cars = driverRepository.getCarsByDriverProfile(driverId)
-            
+
+            // 4. Traemos los autos usando el Profile ID
+            cars = driverRepository.getCarsByDriverProfile(driverId)
+
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -77,19 +81,19 @@ fun DriverProfileView(navController: NavController, driverId: Long) {
             // HEADER
             Box(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth().height(150.dp).background(PrimaryDark))
-                Box(
-                    modifier = Modifier.size(100.dp).clip(CircleShape).background(Primary)
+                ProfileAvatar(
+                    imageUrl = driverUser?.profilePicture,
+                    initials = driverUser?.fullName
+                        ?.split(" ")?.filter { it.isNotBlank() }?.take(2)
+                        ?.joinToString("") { it.first().uppercase() } ?: "D",
+                    size = 100.dp,
+                    backgroundColor = Primary,
+                    contentColor = Color.White,
+                    fontSize = 34.sp,
+                    modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .offset(y = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = driverUser?.fullName?.take(2)?.uppercase() ?: "D",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 34.sp
-                    )
-                }
+                        .offset(y = 10.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(60.dp))
@@ -130,7 +134,6 @@ fun DriverProfileView(navController: NavController, driverId: Long) {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ProfileStat(label = "Services", value = history.size.toString())
-                    ProfileStat(label = "Rating", value = "5.0")
                     ProfileStat(label = "Vehicles", value = cars.size.toString())
                 }
             }

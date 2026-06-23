@@ -1,6 +1,7 @@
 package com.edu.pe.automatch.presentation.screens.mechanic
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -32,6 +33,7 @@ import com.edu.pe.automatch.presentation.components.BottomNavBar
 import com.edu.pe.automatch.presentation.components.BottomNavType
 import com.edu.pe.automatch.presentation.navigation.Screen
 
+// ── Colors ────────────────────────────────────────────────────────────────────
 private val PurpleBg       = Color(0xFFEEEDFE)
 private val DarkCardBg     = Color(0xFF1A1740)
 private val DarkCardBadge  = Color(0xFF2D2A5E)
@@ -115,7 +117,11 @@ fun MechanicDashboard(navController: NavController) {
                 activeServices = requests.count { it.status != "FINALIZED" && it.status != "CANCELLED" }
             )
 
-            SectionWithSeeAll(title = "Recent Requests", showSeeAll = true)
+            SectionWithSeeAll(
+                title = "Recent Requests",
+                showSeeAll = true,
+                onSeeAll = { navController.navigate(Screen.MechanicHistory.route) }
+            )
 
             if (requests.isEmpty()) {
                 Text("No requests found", color = Color.Gray, fontSize = 14.sp)
@@ -228,10 +234,15 @@ private fun QuickActionCard(icon: ImageVector, title: String, subtitle: String, 
 }
 
 @Composable
-private fun SectionWithSeeAll(title: String, showSeeAll: Boolean) {
+private fun SectionWithSeeAll(title: String, showSeeAll: Boolean, onSeeAll: (() -> Unit)? = null) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text(title, fontSize = 17.sp, fontWeight = FontWeight.Medium, color = PurpleDark)
-        if (showSeeAll) Text("See All", fontSize = 13.sp, color = PurplePrimary)
+        if (showSeeAll) Text(
+            "See All",
+            fontSize = 13.sp,
+            color = PurplePrimary,
+            modifier = Modifier.clickable { onSeeAll?.invoke() }
+        )
     }
 }
 

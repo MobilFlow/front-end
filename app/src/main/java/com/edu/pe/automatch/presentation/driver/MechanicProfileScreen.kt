@@ -16,11 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
@@ -30,11 +30,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -44,7 +44,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +55,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.edu.pe.automatch.data.remote.dtos.ReviewResponseDto
 import com.edu.pe.automatch.di.RepositoryModule
+import com.edu.pe.automatch.domain.model.ServiceItem
 import com.edu.pe.automatch.presentation.components.MapComponent
+import com.edu.pe.automatch.presentation.components.ProfileAvatar
 import com.edu.pe.automatch.presentation.components.SpecialtyChip
 import com.edu.pe.automatch.presentation.navigation.Screen
 import com.edu.pe.automatch.presentation.theme.AccentBlue
@@ -70,6 +71,7 @@ import com.edu.pe.automatch.presentation.theme.SoftBackground
 fun MechanicProfileScreen(
     navController: NavController,
     mechanicId: String = "",
+    serviceId: Long? = null,
     viewModel: MechanicProfileViewModel = viewModel(
         factory = remember {
             object : ViewModelProvider.Factory {
@@ -78,7 +80,8 @@ fun MechanicProfileScreen(
                     return MechanicProfileViewModel(
                         RepositoryModule.provideUserRepository(),
                         RepositoryModule.provideMechanicRepository(),
-                        RepositoryModule.provideReviewRepository()
+                        RepositoryModule.provideReviewRepository(),
+                        RepositoryModule.provideServiceCatalogRepository()
                     ) as T
                 }
             }
@@ -106,25 +109,6 @@ fun MechanicProfileScreen(
                     navigationIconContentColor = DarkGray
                 )
             )
-        },
-        bottomBar = {
-            if (uiState is MechanicProfileUiState.Success) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(SoftBackground)
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
-                ) {
-                    Button(
-                        onClick = { navController.navigate(Screen.RequestServiceScreen.route) },
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape = RoundedCornerShape(26.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
-                    ) {
-                        Text("Request service", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                    }
-                }
-            }
         }
     ) { padding ->
         when (val state = uiState) {
@@ -157,6 +141,7 @@ fun MechanicProfileScreen(
                         .background(SoftBackground)
                         .verticalScroll(rememberScrollState())
                 ) {
+                    // Banner + avatar
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Box(
                             modifier = Modifier
@@ -164,20 +149,20 @@ fun MechanicProfileScreen(
                                 .height(120.dp)
                                 .background(PrimaryDark)
                         )
-                        Box(
+                        ProfileAvatar(
+                            imageUrl = state.profilePicture,
+                            initials = initials,
+                            size = 88.dp,
+                            backgroundColor = Primary,
+                            contentColor = Color.White,
+                            fontSize = 30.sp,
                             modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                                .background(Primary)
                                 .align(Alignment.BottomCenter)
-                                .offset(y = 40.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 28.sp)
-                        }
+                                .offset(y = 44.dp)
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(52.dp))
+                    Spacer(modifier = Modifier.height(56.dp))
 
                     Text(
                         text = fullName,
@@ -200,6 +185,7 @@ fun MechanicProfileScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    // Rating + Reviews (nice two-column card)
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                         shape = RoundedCornerShape(16.dp),
@@ -207,19 +193,52 @@ fun MechanicProfileScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            ProfileStat(label = "Rating", value = String.format("%.1f", reputation?.averageRating ?: 0.0))
-                            ProfileStat(label = "Reviews", value = (reputation?.totalReviews ?: 0).toString())
-                            ProfileStat(label = "Workshop", value = mechanic.workshopName ?: "N/A")
+                            RatingBlock(
+                                value = String.format("%.1f", reputation?.averageRating ?: 0.0),
+                                label = "Rating",
+                                showStar = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            HorizontalDividerVertical()
+                            RatingBlock(
+                                value = (reputation?.totalReviews ?: 0).toString(),
+                                label = "Reviews",
+                                showStar = false,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
 
+                    // Workshop name (own labeled row)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Build, contentDescription = null, tint = Primary, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text("Workshop", fontSize = 12.sp, color = Color.Gray)
+                                Text(
+                                    mechanic.workshopName?.takeIf { it.isNotBlank() } ?: "Not specified",
+                                    fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DarkGray
+                                )
+                            }
+                        }
+                    }
+
+                    // Presentation
                     if (!mechanic.description.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text("Presentation", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
+                        SectionTitle("Presentation")
                         Card(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                             shape = RoundedCornerShape(12.dp),
@@ -234,26 +253,48 @@ fun MechanicProfileScreen(
                         }
                     }
 
+                    // Specialties
                     if (mechanic.specialties.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text("Specialties", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
+                        SectionTitle("Specialties")
                         @OptIn(ExperimentalLayoutApi::class)
                         FlowRow(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            mechanic.specialties.forEach { spec ->
-                                SpecialtyChip(label = spec.name)
+                            mechanic.specialties.forEach { spec -> SpecialtyChip(label = spec.name) }
+                        }
+                    }
+
+                    // Services offered
+                    SectionTitle("Services")
+                    if (state.services.isEmpty()) {
+                        Text(
+                            "This mechanic has no active services right now.",
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            color = Color.Gray, fontSize = 14.sp
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            state.services.forEach { service ->
+                                ServiceOfferCard(
+                                    service = service,
+                                    onRequest = {
+                                        navController.navigate(
+                                            Screen.RequestServiceScreen.createRoute(service.id, mechanicId.toLongOrNull())
+                                        )
+                                    }
+                                )
                             }
                         }
                     }
 
+                    // Location
                     if (!mechanic.workshopAddress.isNullOrBlank() || location != null) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text("Location", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
+                        SectionTitle("Location")
                         Card(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                             shape = RoundedCornerShape(16.dp),
@@ -269,7 +310,6 @@ fun MechanicProfileScreen(
                                         fontSize = 14.sp, color = DarkGray
                                     )
                                 }
-                                
                                 if (location != null) {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     MapComponent(
@@ -277,29 +317,23 @@ fun MechanicProfileScreen(
                                         longitude = location.longitude,
                                         title = mechanic.workshopName ?: "Workshop"
                                     )
+                                } else if (!mechanic.workshopAddress.isNullOrBlank()) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    MapComponent(
+                                        address = mechanic.workshopAddress,
+                                        title = mechanic.workshopName ?: "Workshop"
+                                    )
                                 }
                             }
                         }
                     }
 
-                    // Reviews Section
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Reviews", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray)
-                        TextButton(onClick = { /* Read more functionality if needed */ }) {
-                            Text("Read More", color = Primary)
-                        }
-                    }
-                    
+                    // Reviews
+                    SectionTitle("Reviews")
                     if (state.reviews.isEmpty()) {
                         Text(
                             "No reviews yet",
-                            modifier = Modifier.fillMaxWidth().padding(20.dp),
-                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                             color = Color.Gray
                         )
                     } else {
@@ -309,7 +343,7 @@ fun MechanicProfileScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
                 }
             }
         }
@@ -317,10 +351,70 @@ fun MechanicProfileScreen(
 }
 
 @Composable
-private fun ProfileStat(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Primary)
+private fun SectionTitle(text: String) {
+    Spacer(modifier = Modifier.height(24.dp))
+    Text(text, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DarkGray, modifier = Modifier.padding(horizontal = 20.dp))
+    Spacer(modifier = Modifier.height(10.dp))
+}
+
+@Composable
+private fun RatingBlock(value: String, label: String, showStar: Boolean, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (showStar) {
+                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB400), modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Text(text = value, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Primary)
+        }
+        Spacer(modifier = Modifier.height(2.dp))
         Text(text = label, fontSize = 12.sp, color = Color.Gray)
+    }
+}
+
+@Composable
+private fun HorizontalDividerVertical() {
+    Box(
+        modifier = Modifier
+            .height(40.dp)
+            .width(1.dp)
+            .background(Color(0xFFE0E0E0))
+    )
+}
+
+@Composable
+private fun ServiceOfferCard(service: ServiceItem, onRequest: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(service.title.ifBlank { "Service #${service.id}" }, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = DarkGray)
+                if (service.categoryName != null) {
+                    Text(service.categoryName, fontSize = 12.sp, color = Primary, fontWeight = FontWeight.Medium)
+                }
+                val min = service.minimumPrice
+                val max = service.maximumPrice
+                if (min != null && max != null) {
+                    Text("S/ ${min.toInt()} - S/ ${max.toInt()}", fontSize = 12.sp, color = Color.Gray)
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Button(
+                onClick = onRequest,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Primary, contentColor = Color.White)
+            ) {
+                Text("Request", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
     }
 }
 
@@ -340,34 +434,15 @@ private fun ReviewItem(review: ReviewResponseDto) {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     repeat(5) {
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = null,
-                            tint = Color(0xFFFFB400),
-                            modifier = Modifier.size(14.dp)
-                        )
+                        Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB400), modifier = Modifier.size(14.dp))
                     }
                 }
-                Text(
-                    text = review.createdAt?.take(10) ?: "",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
+                Text(text = review.createdAt?.take(10) ?: "", fontSize = 12.sp, color = Color.Gray)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = review.content,
-                fontSize = 14.sp,
-                color = DarkGray,
-                lineHeight = 20.sp
-            )
+            Text(text = review.content, fontSize = 14.sp, color = DarkGray, lineHeight = 20.sp)
             if (review.edited) {
-                Text(
-                    text = "(Edited)",
-                    fontSize = 11.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                Text(text = "(Edited)", fontSize = 11.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
             }
         }
     }
